@@ -136,6 +136,8 @@ exports.updateUserProfile = (req, res) => {
   const headerAuth = req.headers['authorization'];
   const userId = auth.getUserId(headerAuth);
 
+  if (userId < 0) return res.status(400).json({ error: 'wrong token' });
+
   const bio = req.body.bio;
 
   models.User.findOne({
