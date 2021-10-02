@@ -59,6 +59,9 @@ typings/
 # dotenv environment variables file
 .env
 
+# sequelize config
+/api/config/config.json
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 
