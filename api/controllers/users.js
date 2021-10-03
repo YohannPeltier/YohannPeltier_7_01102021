@@ -2,7 +2,7 @@
 const bcrypt = require('bcrypt');
 const models = require('../models');
 const auth = require('../middleware/auth');
-const { config } = require('../config/config');
+const { config } = require('../config');
 
 // SignUp
 exports.signup = (req, res, next) => {
