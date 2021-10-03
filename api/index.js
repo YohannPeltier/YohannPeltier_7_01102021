@@ -2,6 +2,7 @@
 const express = require('express');
 const { Sequelize } = require('sequelize');
 const usersRoutes = require('./routes/users');
+const messagesRoutes = require('./routes/messages');
 
 // Connection database
 const sequelize = new Sequelize(
@@ -28,5 +29,6 @@ app.use(express.json());
 
 // Routes
 app.use('/users', usersRoutes);
+app.use('/messages', messagesRoutes);
 
 module.exports = app;
