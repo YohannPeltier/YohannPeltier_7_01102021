@@ -1,7 +1,7 @@
 // Imports
+const { config } = require('../config.js');
 const models = require('../models');
 const auth = require('../middleware/auth');
-const { config } = require('../config.js');
 
 // Create message
 exports.createMessage = (req, res, next) => {
@@ -85,3 +85,5 @@ exports.listMessages = (req, res, next) => {
       res.status(500).json({ error: 'invalid fields' });
     });
 };
+
+export default {};

@@ -34,3 +34,5 @@ exports.getUserId = (authorization) => {
   }
   return userId;
 };
+
+export default {};

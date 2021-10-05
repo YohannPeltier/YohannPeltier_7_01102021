@@ -11,3 +11,5 @@ router.get('/me', usersCtrl.getUserProfile);
 router.put('/me', usersCtrl.updateUserProfile);
 
 module.exports = router;
+
+export default {};

@@ -9,3 +9,5 @@ router.post('/create', messagesCtrl.createMessage);
 router.get('/', messagesCtrl.listMessages);
 
 module.exports = router;
+
+export default {};

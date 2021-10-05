@@ -30,3 +30,5 @@ module.exports = (sequelize, DataTypes) => {
   );
   return Message;
 };
+
+export default {};
