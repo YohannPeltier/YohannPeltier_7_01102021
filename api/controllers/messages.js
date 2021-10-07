@@ -1,6 +1,7 @@
 // Imports
 const { config } = require('../config.js');
 const models = require('../models');
+const asyncLib = require('async');
 const auth = require('../middleware/auth');
 
 // Create message
@@ -10,6 +11,7 @@ exports.createMessage = (req, res, next) => {
 
   if (userId < 0) return res.status(400).json({ error: 'wrong token' });
 
+  // Params
   const title = req.body.title;
   const content = req.body.content;
 
@@ -24,38 +26,50 @@ exports.createMessage = (req, res, next) => {
     return res.status(400).json({ error: 'invalid parameters' });
   }
 
-  models.User.findOne({
-    where: { id: userId },
-  })
-    .then((userFound) => {
-      if (userFound) {
-        models.Message.create({
-          title: title,
-          content: content,
-          likes: 0,
-          UserId: userFound.id,
-        }).then((newMessage) => {
-          if (newMessage) {
-            return res.status(201).json(newMessage);
-          } else {
-            return res.status(500).json({ error: 'cannot post message' });
-          }
-        });
+  asyncLib.waterfall(
+    [
+      function (done) {
+        models.User.findOne({
+          where: { id: userId },
+        })
+          .then(function (userFound) {
+            done(null, userFound);
+          })
+          .catch(function (err) {
+            return res.status(500).json({ error: 'unable to verify user' });
+          });
+      },
+      function (userFound, done) {
+        if (userFound) {
+          models.Message.create({
+            title: title,
+            content: content,
+            likes: 0,
+            UserId: userFound.id,
+          }).then(function (newMessage) {
+            done(newMessage);
+          });
+        } else {
+          res.status(404).json({ error: 'user not found' });
+        }
+      },
+    ],
+    function (newMessage) {
+      if (newMessage) {
+        return res.status(201).json(newMessage);
       } else {
-        res.status(404).json({ error: 'user not found' });
+        return res.status(500).json({ error: 'cannot post message' });
       }
-    })
-    .catch((error) => {
-      return res.status(500).json({ error: 'unable to verify user' });
-    });
+    }
+  );
 };
 
 // List messages
 exports.listMessages = (req, res, next) => {
-  var fields = req.query.fields;
-  var limit = parseInt(req.query.limit);
-  var offset = parseInt(req.query.offset);
-  var order = req.query.order;
+  const fields = req.query.fields;
+  const limit = parseInt(req.query.limit);
+  const offset = parseInt(req.query.offset);
+  const order = req.query.order;
 
   if (limit > config.ITEMS_LIMIT) {
     limit = config.ITEMS_LIMIT;
