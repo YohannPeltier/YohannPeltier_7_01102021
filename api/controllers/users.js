@@ -23,23 +23,17 @@ exports.signup = (req, res, next) => {
     return res.status(400).json({ error: 'missing parameters' });
   }
 
-  if (
-    (firstname.length || lastname.length) > config.NAME_LIMIT_MAX ||
-    (firstname.length || lastname.length) < config.NAME_LIMIT_MIN
-  ) {
-    return res
-      .status(400)
-      .json({ error: 'wrong firstname or lastname (must be length 3 - 25)' });
+  if (!config.NAME_REGEX.test(firstname)) {
+    return res.status(400).json({ error: 'invalid firstname' });
+  }
+  if (!config.NAME_REGEX.test(lastname)) {
+    return res.status(400).json({ error: 'invalid lastname' });
   }
   if (!config.EMAIL_REGEX.test(email)) {
-    return res.status(400).json({ error: 'email is not valid' });
+    return res.status(400).json({ error: 'invalid email' });
   }
-
   if (!config.PASSWORD_REGEX.test(password)) {
-    return res.status(400).json({
-      error:
-        'password invalid (must length 4 - 8 and include 1 number at least)',
-    });
+    return res.status(400).json({ error: 'invalid password' });
   }
 
   asyncLib.waterfall(
@@ -155,12 +149,19 @@ exports.login = (req, res, next) => {
 exports.getUserProfile = (req, res, next) => {
   // Getting auth header
   const headerAuth = req.headers['authorization'];
-  const userId = auth.getUserId(headerAuth);
+  let userId = auth.getUserId(headerAuth);
+  let attributes = ['id', 'firstname', 'lastname', 'bio'];
+  const paramsUserId = parseInt(req.params.id);
 
-  if (userId < 0) return res.status(400).json({ error: 'wrong token' });
+  if (userId < 0) {
+    return res.status(400).json({ error: 'wrong token' });
+  } else if (userId === paramsUserId || !paramsUserId) {
+    attributes.push('email');
+  }
+  userId = paramsUserId ? paramsUserId : userId;
 
   models.User.findOne({
-    attributes: ['id', 'email', 'firstname', 'lastname', 'bio'],
+    attributes: attributes,
     where: { id: userId },
   })
     .then(function (user) {
@@ -181,7 +182,7 @@ exports.updateUserProfile = (req, res) => {
   const headerAuth = req.headers['authorization'];
   const userId = auth.getUserId(headerAuth);
 
-  if (userId < 0) return res.status(400).json({ error: 'wrong token' });
+  if (userId <= 0) return res.status(400).json({ error: 'wrong token' });
 
   // Params
   const bio = req.body.bio;
