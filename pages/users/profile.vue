@@ -1,6 +1,7 @@
 <template>
   <div class="d-flex mt-3 flex-column">
     <b-card tag="section" class="align-self-center mb-3 w-20">
+      <h4>Mon Profile</h4>
       <p>
         <strong>Prénom : </strong>
         {{ loggedInUser.firstname }}
