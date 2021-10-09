@@ -60,6 +60,7 @@ export default {
         endpoints: {
           login: { url: 'users/login', method: 'post' },
           user: { url: 'users/me', method: 'get', propertyName: '' },
+          logout: false,
         },
       },
     },
