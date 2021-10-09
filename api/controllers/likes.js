@@ -10,13 +10,13 @@ const LIKED = 1;
 // Routes
 exports.likePost = (req, res, next) => {
   // Getting auth header
-  var headerAuth = req.headers['authorization'];
-  var userId = auth.getUserId(headerAuth);
+  const headerAuth = req.headers['authorization'];
+  const userId = auth.getUserId(headerAuth);
 
   if (userId < 0) return res.status(400).json({ error: 'wrong token' });
 
   // Params
-  var messageId = parseInt(req.params.id);
+  const messageId = parseInt(req.params.id);
 
   if (messageId <= 0) {
     return res.status(400).json({ error: 'invalid parameters' });
@@ -128,11 +128,11 @@ exports.likePost = (req, res, next) => {
 };
 exports.dislikePost = (req, res, next) => {
   // Getting auth header
-  var headerAuth = req.headers['authorization'];
-  var userId = auth.getUserId(headerAuth);
+  const headerAuth = req.headers['authorization'];
+  const userId = auth.getUserId(headerAuth);
 
   // Params
-  var messageId = parseInt(req.params.id);
+  const messageId = parseInt(req.params.id);
 
   if (messageId <= 0) {
     return res.status(400).json({ error: 'invalid parameters' });
@@ -175,10 +175,10 @@ exports.dislikePost = (req, res, next) => {
             },
           })
             .then(function (userAlreadyLikedFound) {
-              console.log(userAlreadyLikedFound);
               done(null, messageFound, userFound, userAlreadyLikedFound);
             })
             .catch(function (err) {
+              console.log(err);
               return res
                 .status(500)
                 .json({ error: 'unable to verify is user already liked' });
