@@ -1,16 +1,13 @@
 <template>
-  <div class="d-flex mt-3 flex-column">
-    <Notification
-      :message="error"
-      v-if="error"
-      class="align-self-center w-20"
-    />
-    <b-card tag="section" class="align-self-center mb-3 w-20">
-      <b-form @submit.prevent="login">
+  <section class="pb-3">
+    <Notification :message="error" v-if="error" />
+    <b-card tag="article" class="shadow mx-auto mt-3 w-8">
+      <b-form @submit.prevent="login" ref="form" novalidate>
         <b-form-group
           id="input-group-email"
           label="Addresse Email :"
           label-for="input-email"
+          invalid-feedback="Champ obligatoire."
         >
           <b-form-input
             id="input-email"
@@ -25,6 +22,7 @@
           id="input-group-password"
           label="Mot de passe :"
           label-for="input-password"
+          invalid-feedback="Champ obligatoire."
         >
           <b-form-input
             id="input-password"
@@ -39,17 +37,17 @@
         </div>
       </b-form>
 
-      <div class="text-center mt-2">
-        Vous n'avez pas de compte ?
-        <nuxt-link to="/login">Inscrivez-vous</nuxt-link>
+      <div class="text-center mt-4">
+        Vous n'avez pas de compte ?<br />
+        <b-link to="/signup">Inscrivez-vous</b-link>
       </div>
     </b-card>
-  </div>
+  </section>
 </template>
 
 <style>
-.w-20 {
-  width: 20rem;
+.w-8 {
+  max-width: 24rem;
 }
 </style>
 
@@ -72,20 +70,31 @@ export default {
   },
 
   methods: {
-    async login() {
-      try {
-        let response = await this.$auth.loginWith('local', {
-          data: {
-            email: this.email,
-            password: this.password,
-          },
-        });
-        console.log(response);
+    async login(event) {
+      if (this.$refs.form.checkValidity() === false) {
+        event.preventDefault();
+        event.stopPropagation();
+      } else {
+        try {
+          let response = await this.$auth.loginWith('local', {
+            data: {
+              email: this.email,
+              password: this.password,
+            },
+          });
+          console.log(response);
 
-        this.$router.push('/');
-      } catch (e) {
-        this.error = e.response.data.error;
+          this.$router.push('/');
+        } catch (e) {
+          if (
+            e.response.data.error === 'user not exist in DB' ||
+            e.response.data.error === 'invalid password'
+          ) {
+            this.error = 'Adresse email ou mot de passe incorrect.';
+          }
+        }
       }
+      this.$refs.form.classList.add('was-validated');
     },
   },
 };
