@@ -12,17 +12,13 @@ exports.createMessage = (req, res, next) => {
   if (userId < 0) return res.status(400).json({ error: 'wrong token' });
 
   // Params
-  const title = req.body.title;
   const content = req.body.content;
 
-  if (title == null || content == null) {
+  if (content == null) {
     return res.status(400).json({ error: 'missing parameters' });
   }
 
-  if (
-    title.length < config.TITLE_LIMIT_MIN ||
-    content.length < config.CONTENT_LIMIT_MIN
-  ) {
+  if (content.length < config.CONTENT_LIMIT_MIN) {
     return res.status(400).json({ error: 'invalid parameters' });
   }
 
@@ -42,7 +38,6 @@ exports.createMessage = (req, res, next) => {
       function (userFound, done) {
         if (userFound) {
           models.Message.create({
-            title: title,
             content: content,
             likes: 0,
             UserId: userFound.id,
@@ -83,7 +78,13 @@ exports.listMessages = (req, res, next) => {
     include: [
       {
         model: models.User,
+        as: 'User',
         attributes: ['firstname', 'lastname'],
+      },
+      {
+        model: models.Like,
+        as: 'Likes',
+        attributes: ['MessageId', 'UserId', 'isLike'],
       },
     ],
   })
