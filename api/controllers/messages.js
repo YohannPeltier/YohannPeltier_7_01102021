@@ -79,7 +79,7 @@ exports.listMessages = (req, res, next) => {
       {
         model: models.User,
         as: 'User',
-        attributes: ['firstname', 'lastname'],
+        attributes: ['firstname', 'lastname', 'picture'],
       },
       {
         model: models.Like,

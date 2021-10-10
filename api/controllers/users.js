@@ -12,6 +12,7 @@ exports.signup = (req, res, next) => {
   const firstname = req.body.firstname;
   const lastname = req.body.lastname;
   const password = req.body.password;
+  const file = req.file;
   const bio = req.body.bio;
 
   if (
@@ -31,6 +32,9 @@ exports.signup = (req, res, next) => {
   }
   if (!config.EMAIL_REGEX.test(email)) {
     return res.status(400).json({ error: 'invalid email' });
+  }
+  if (!config.PASSWORD_REGEX.test(password)) {
+    return res.status(400).json({ error: 'invalid password' });
   }
   if (!config.PASSWORD_REGEX.test(password)) {
     return res.status(400).json({ error: 'invalid password' });
@@ -60,11 +64,16 @@ exports.signup = (req, res, next) => {
         }
       },
       function (userFound, bcryptedPassword, done) {
+        let picture = 'default.jpg';
+        if (file) {
+          picture = file.filename;
+        }
         const newUser = models.User.create({
           email: email,
           firstname: firstname,
           lastname: lastname,
           password: bcryptedPassword,
+          picture: picture,
           bio: bio,
           isAdmin: 0,
         })
@@ -150,7 +159,7 @@ exports.getUserProfile = (req, res, next) => {
   // Getting auth header
   const headerAuth = req.headers['authorization'];
   let userId = auth.getUserId(headerAuth);
-  let attributes = ['id', 'firstname', 'lastname', 'bio'];
+  let attributes = ['id', 'firstname', 'lastname', 'picture', 'bio'];
   const paramsUserId = parseInt(req.params.id);
 
   if (userId < 0) {
