@@ -1,8 +1,13 @@
 <template>
-  <section class="pb-3">
+  <section class="container pb-3">
     <Notification :message="error" v-if="error" />
     <b-card tag="article" class="shadow mx-auto mt-3 w-8">
-      <b-form @submit.prevent="signup" ref="form" novalidate>
+      <b-form
+        @submit.prevent="signup"
+        ref="form"
+        enctype="multipart/form-data"
+        novalidate
+      >
         <b-form-group
           id="input-group-firstname"
           label="Prénom :"
@@ -70,14 +75,17 @@
           id="file-group-picture"
           label="Photo de profil :"
           label-for="file-picture"
-          description=".jpeg, .jpg, .png, .gif"
+          description=".jpeg, .jpg, .png (5Mo)"
         >
           <b-form-file
             id="input-picture"
             v-model="picture"
+            :state="picture ? Boolean(picture.size < 5 * 1024 * 1024) : null"
+            @change="onChangeImage"
+            ref="picture"
             placeholder="Choisissez un fichier..."
             browse-text="Parcourir"
-            accept=".jpeg, .jpg, .png, .gif"
+            accept=".jpeg, .jpg, .png"
           ></b-form-file>
         </b-form-group>
         <div class="text-center">
@@ -96,6 +104,11 @@
 <style>
 .w-8 {
   max-width: 24rem;
+}
+.was-validated .custom-file-input:invalid ~ .custom-file-label,
+.custom-file-input.is-invalid ~ .custom-file-label {
+  border-color: #dc3545 !important;
+  box-shadow: none !important;
 }
 </style>
 
@@ -119,34 +132,45 @@ export default {
     };
   },
   methods: {
-    async signup(event) {
-      if (this.$refs.form.checkValidity() === false) {
-        event.preventDefault();
-        event.stopPropagation();
-      } else {
-        try {
-          await this.$axios.post('users/signup', {
-            firstname: this.firstname,
-            lastname: this.lastname,
-            email: this.email,
-            password: this.password,
-            picture: this.picture,
-          });
+    async signup() {
+      console.log(this.$refs.picture.state);
+      if (this.$refs.picture.state === true) {
+        if (this.$refs.form.checkValidity() === true) {
+          try {
+            const formData = new FormData();
+            formData.append('firstname', this.firstname);
+            formData.append('lastname', this.lastname);
+            formData.append('email', this.email);
+            formData.append('password', this.password);
+            formData.append('image', this.picture);
 
-          await this.$auth.loginWith('local', {
-            data: {
-              email: this.email,
-              password: this.password,
-            },
-          });
+            await this.$axios.post('users/signup', formData);
 
-          this.$router.push('/');
-        } catch (e) {
-          if (e.response.data.error === 'user already exist')
-            this.error = 'Cet utilisateur existe déjà.';
+            await this.$auth.loginWith('local', {
+              data: {
+                email: this.email,
+                password: this.password,
+              },
+            });
+
+            this.$router.push('/users/profile');
+          } catch (e) {
+            if (e.response.data.error === 'user already exist')
+              this.error = 'Cet utilisateur existe déjà.';
+          }
         }
       }
       this.$refs.form.classList.add('was-validated');
+    },
+    onChangeImage() {
+      const file = this.$refs.picture.files[0];
+      if (file) {
+        if (file.size < 5 * 1024 * 1024) {
+          this.$refs.picture.state = true;
+        } else {
+          this.$refs.picture.state = false;
+        }
+      }
     },
   },
 };

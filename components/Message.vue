@@ -6,21 +6,32 @@
     class="shadow-sm mx-auto mt-3 w-9"
   >
     <template #header>
-      <h6 class="mb-0">
-        <b-link class="text-dark" :to="'/users/' + userId"
-          >{{ user.firstname }} {{ user.lastname }}</b-link
-        >
-      </h6>
-      <b-link :id="`message-tooltip-${id}`" class="text-muted">
-        <small>{{ date }}</small>
-      </b-link>
-      <b-tooltip
-        :target="`message-tooltip-${id}`"
-        triggers="hover"
-        placement="bottom"
-      >
-        le {{ dateLong }} à {{ time }}
-      </b-tooltip>
+      <div class="d-flex ml-n1">
+        <b-img
+          :src="coverImageProfil(user.picture)"
+          width="43"
+          height="43"
+          rounded="circle"
+          :alt="`Image de profil de ${user.firstname} ${user.lastname}`"
+        />
+        <div class="ml-2">
+          <h6 class="mb-0">
+            <b-link class="text-dark" :to="`/users/${userId}`"
+              >{{ user.firstname }} {{ user.lastname }}</b-link
+            >
+          </h6>
+          <b-link :id="`message-tooltip-${id}`" class="text-muted">
+            <small>{{ date }}</small>
+          </b-link>
+          <b-tooltip
+            :target="`message-tooltip-${id}`"
+            triggers="hover"
+            placement="bottom"
+          >
+            le {{ dateLong }} à {{ time }}
+          </b-tooltip>
+        </div>
+      </div>
     </template>
     <b-card-text>{{ content }}</b-card-text>
     <template #footer>
@@ -78,17 +89,17 @@
 <script>
 import { BIcon, BIconHandThumbsUp, BIconChatSquareText } from 'bootstrap-vue';
 import { mapGetters } from 'vuex';
+import { IMAGE_PROFILE_DEFAULT } from '../constants';
 
 export default {
   computed: {
-    ...mapGetters(['isAuthenticated', 'loggedInUser']),
+    ...mapGetters(['loggedInUser']),
   },
   components: {
     BIcon,
     BIconHandThumbsUp,
     BIconChatSquareText,
   },
-  name: 'Notification',
   props: [
     'id',
     'userId',
@@ -144,6 +155,16 @@ export default {
           this.likesCounter++;
         });
       }
+    },
+    coverImageProfil(url) {
+      if (url !== '') {
+        try {
+          url = require('@/assets/img/profiles/' + url);
+        } catch (e) {
+          url = IMAGE_PROFILE_DEFAULT; // Default image.
+        }
+      } else url = IMAGE_PROFILE_DEFAULT; // Default image.
+      return url;
     },
   },
   beforeMount() {
