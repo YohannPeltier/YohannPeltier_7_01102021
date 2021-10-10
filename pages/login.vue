@@ -1,5 +1,5 @@
 <template>
-  <section class="pb-3">
+  <section class="container pb-3">
     <Notification :message="error" v-if="error" />
     <b-card tag="article" class="shadow mx-auto mt-3 w-8">
       <b-form @submit.prevent="login" ref="form" novalidate>
@@ -70,11 +70,8 @@ export default {
   },
 
   methods: {
-    async login(event) {
-      if (this.$refs.form.checkValidity() === false) {
-        event.preventDefault();
-        event.stopPropagation();
-      } else {
+    async login() {
+      if (this.$refs.form.checkValidity() === true) {
         try {
           let response = await this.$auth.loginWith('local', {
             data: {
