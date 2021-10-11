@@ -6,7 +6,7 @@
     class="shadow-sm mx-auto mt-3 w-9"
   >
     <template #header>
-      <div class="d-flex ml-n1">
+      <div class="d-flex ml-n2">
         <b-img
           :src="coverImageProfil(user.picture)"
           width="43"
@@ -33,12 +33,19 @@
         </div>
       </div>
     </template>
-    <b-card-text>{{ content }}</b-card-text>
+    <b-card-text>
+      {{ content }}
+    </b-card-text>
+    <b-card-text v-if="attachement" class="ml-n2 mr-n2 mb-n2 text-center">
+      <b-img :src="coverImageMessage(attachement)" class="img-message" fluid />
+    </b-card-text>
     <template #footer>
       <div class="row gap-3 ml-n2 mr-n2">
         <b-button
           @click="like"
+          ref="like"
           variant="light"
+          aria-label="J'aime"
           class="
             col
             d-inline-flex
@@ -48,13 +55,16 @@
           "
           :class="{ 'text-primary': isLike }"
         >
-          <b-icon icon="hand-thumbs-up" aria-label="J'aime"></b-icon>
+          <b-icon icon="hand-thumbs-up" aria-hidden="true"></b-icon>
           <span v-if="likesCounter" class="ml-2">
             {{ likesCounter }}
           </span>
         </b-button>
         <b-button
+          @click="comment"
+          ref="comment"
           variant="light"
+          aria-label="Commenter"
           class="
             col
             d-inline-flex
@@ -63,7 +73,7 @@
             line-height-3
           "
         >
-          <b-icon icon="chat-square-text" aria-label="Commenter"></b-icon>
+          <b-icon icon="chat-square-text" aria-hidden="true"></b-icon>
           <span v-if="commentsCounter" class="ml-3">{{ commentsCounter }}</span>
         </b-button>
       </div>
@@ -75,21 +85,31 @@
 .w-9 {
   max-width: 48rem;
 }
-.gap-3 {
-  gap: 1rem;
-}
 .tooltip-inner {
   max-width: none;
 }
+.gap-3 {
+  gap: 1rem;
+}
 .line-height-3 {
   line-height: 1rem;
+}
+</style>
+<style scoped>
+.img-message {
+  width: auto;
+  height: auto;
+  max-height: 48rem;
+}
+img {
+  object-fit: cover;
 }
 </style>
 
 <script>
 import { BIcon, BIconHandThumbsUp, BIconChatSquareText } from 'bootstrap-vue';
 import { mapGetters } from 'vuex';
-import { IMAGE_PROFILE_DEFAULT } from '../constants';
+import { IMAGE_PROFILE_DEFAULT, IMAGE_MESSAGE_DEFAULT } from '../constants';
 
 export default {
   computed: {
@@ -142,8 +162,8 @@ export default {
         }
       });
     },
-    like(event) {
-      console.log(event.target.attributes);
+    like() {
+      this.$refs.like.blur();
       if (this.isLike === true) {
         this.$axios.post(`messages/${this.id}/dislike`).then(() => {
           this.isLike = false;
@@ -156,6 +176,9 @@ export default {
         });
       }
     },
+    comment() {
+      this.$refs.comment.blur();
+    },
     coverImageProfil(url) {
       if (url !== '') {
         try {
@@ -164,6 +187,16 @@ export default {
           url = IMAGE_PROFILE_DEFAULT; // Default image.
         }
       } else url = IMAGE_PROFILE_DEFAULT; // Default image.
+      return url;
+    },
+    coverImageMessage(url) {
+      if (url !== '') {
+        try {
+          url = require('@/assets/img/messages/' + url);
+        } catch (e) {
+          url = IMAGE_MESSAGE_DEFAULT; // Default image.
+        }
+      } else url = IMAGE_MESSAGE_DEFAULT; // Default image.
       return url;
     },
   },
