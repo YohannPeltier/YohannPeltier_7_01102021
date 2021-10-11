@@ -36,9 +36,6 @@ exports.signup = (req, res, next) => {
   if (!config.PASSWORD_REGEX.test(password)) {
     return res.status(400).json({ error: 'invalid password' });
   }
-  if (!config.PASSWORD_REGEX.test(password)) {
-    return res.status(400).json({ error: 'invalid password' });
-  }
 
   asyncLib.waterfall(
     [
