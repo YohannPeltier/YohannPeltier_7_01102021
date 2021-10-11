@@ -4,6 +4,7 @@
       <h1 class="text-center mt-5">Bienvenue sur Groupomania</h1>
     </template>
     <template v-else>
+      <PostMessage />
       <Message
         v-for="(message, index) in messages"
         :key="index"
@@ -42,6 +43,17 @@ export default {
   },
   computed: {
     ...mapGetters(['isAuthenticated', 'loggedInUser']),
+  },
+  methods: {
+    newMessage(data) {
+      data.User = [
+        this.loggedInUser.firstname,
+        this.loggedInUser.lastname,
+        this.loggedInUser.picture,
+      ];
+      data.Likes = [];
+      this.messages.unshift(data);
+    },
   },
 };
 </script>
