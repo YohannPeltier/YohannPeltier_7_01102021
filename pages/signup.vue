@@ -2,12 +2,7 @@
   <section class="container pb-3">
     <Notification :message="error" v-if="error" />
     <b-card tag="article" class="shadow mx-auto mt-3 w-8">
-      <b-form
-        @submit.prevent="signup"
-        ref="form"
-        enctype="multipart/form-data"
-        novalidate
-      >
+      <b-form @submit.prevent="signup" ref="form" novalidate>
         <b-form-group
           id="input-group-firstname"
           label="Prénom :"
@@ -83,7 +78,8 @@
             :state="picture ? Boolean(picture.size < 5 * 1024 * 1024) : null"
             @change="onChangeImage"
             ref="picture"
-            placeholder="Choisissez un fichier..."
+            placeholder="Choisissez une image..."
+            drop-placeholder="Déposez votre image ici..."
             browse-text="Parcourir"
             accept=".jpeg, .jpg, .png"
           ></b-form-file>
@@ -133,8 +129,10 @@ export default {
   },
   methods: {
     async signup() {
-      console.log(this.$refs.picture.state);
-      if (this.$refs.picture.state === true) {
+      if (
+        this.$refs.picture.state === true ||
+        this.$refs.picture.state === null
+      ) {
         if (this.$refs.form.checkValidity() === true) {
           try {
             const formData = new FormData();
@@ -142,7 +140,7 @@ export default {
             formData.append('lastname', this.lastname);
             formData.append('email', this.email);
             formData.append('password', this.password);
-            formData.append('image', this.picture);
+            formData.append('profilePicture', this.picture);
 
             await this.$axios.post('users/signup', formData);
 
