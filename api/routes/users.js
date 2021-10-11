@@ -2,13 +2,18 @@
 const express = require('express');
 const router = express.Router();
 
-const multer = require('../middleware/multer-config');
 const usersCtrl = require('../controllers/users');
+
+const { multerProfile } = require('../middleware/multer-config');
 
 //console.log(multer.profileImage);
 
 // Routes
-router.post('/signup', multer, usersCtrl.signup);
+router.post(
+  '/signup',
+  multerProfile.single('profilePicture'),
+  usersCtrl.signup
+);
 router.post('/login', usersCtrl.login);
 router.get('/me', usersCtrl.getUserProfile);
 router.put('/me', usersCtrl.updateUserProfile);

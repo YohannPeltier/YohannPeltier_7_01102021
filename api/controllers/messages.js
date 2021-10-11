@@ -13,6 +13,7 @@ exports.createMessage = (req, res, next) => {
 
   // Params
   const content = req.body.content;
+  const file = req.file;
 
   if (content == null) {
     return res.status(400).json({ error: 'missing parameters' });
@@ -36,9 +37,15 @@ exports.createMessage = (req, res, next) => {
           });
       },
       function (userFound, done) {
+        let image = null;
+        if (file) {
+          console.log(file.filename);
+          image = file.filename;
+        }
         if (userFound) {
           models.Message.create({
             content: content,
+            attachement: image,
             likes: 0,
             UserId: userFound.id,
           }).then(function (newMessage) {

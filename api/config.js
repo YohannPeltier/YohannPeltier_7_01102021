@@ -13,6 +13,7 @@ const config = {
   },
   LIMIT_SIZE: 5 * 1024 * 1024,
   ROUTE_IMAGES_PROFILES: 'assets/img/profiles',
+  ROUTE_IMAGES_MESSAGES: 'assets/img/messages',
 };
 
 module.exports = { config };

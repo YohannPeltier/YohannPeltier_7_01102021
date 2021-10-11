@@ -1,12 +1,19 @@
 // Imports
 const express = require('express');
+const multer = require('multer');
 const router = express.Router();
 
 const messagesCtrl = require('../controllers/messages');
 const likesCtrl = require('../controllers/likes');
 
+const { multerMessage } = require('../middleware/multer-config');
+
 // Routes
-router.post('/create', messagesCtrl.createMessage);
+router.post(
+  '/create',
+  multerMessage.single('messageImage'),
+  messagesCtrl.createMessage
+);
 router.get('/', messagesCtrl.listMessages);
 
 router.post('/:id/like', likesCtrl.likePost);
