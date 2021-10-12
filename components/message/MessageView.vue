@@ -7,13 +7,12 @@
   >
     <template #header>
       <div class="d-flex ml-n2">
-        <b-img
-          :src="coverImageProfil(user.picture)"
-          width="43"
-          height="43"
-          rounded="circle"
+        <nuxt-img
+          :src="`profiles/${user.picture}`"
+          preset="profileMessage"
+          class="rounded-circle"
           :alt="`Image de profil de ${user.firstname} ${user.lastname}`"
-        />
+        ></nuxt-img>
         <div class="ml-2">
           <h6 class="mb-0">
             <b-link
@@ -36,17 +35,18 @@
       </div>
     </template>
     <b-card-body>
-      <b-card-text class="content-message">{{ content }}</b-card-text>
+      <b-card-text class="pre">{{ content }}</b-card-text>
       <b-card-text v-if="attachement" class="ml-n2 mr-n2 mb-n2 text-center">
-        <b-img
-          :src="coverImageMessage(attachement)"
+        <nuxt-img
+          :src="`messages/${attachement}`"
+          sizes="sm:100vw md:100vw lg:742px"
+          preset="message"
           class="img-message"
-          fluid
-        />
+        ></nuxt-img>
       </b-card-text>
     </b-card-body>
     <b-list-group flush>
-      <b-list-group-item class="footer">
+      <b-list-group-item class="footer" aria-label="footer">
         <div class="row gap-3 ml-n2 mr-n2">
           <b-button
             @click="like"
@@ -116,19 +116,15 @@
 .line-height-3 {
   line-height: 1rem;
 }
-</style>
-<style scoped>
-.content-message {
+.pre {
   white-space: pre-line;
   line-height: 1.3rem;
 }
+</style>
+<style scoped>
 .img-message {
-  width: auto;
-  height: auto;
   max-height: 48rem;
-}
-img {
-  object-fit: cover;
+  max-width: 100%;
 }
 .footer {
   padding: 0.75rem 1.25rem;
@@ -139,7 +135,6 @@ img {
 <script>
 import { BIcon, BIconHandThumbsUp, BIconChatSquareText } from 'bootstrap-vue';
 import { mapGetters } from 'vuex';
-import { IMAGE_PROFILE_DEFAULT, IMAGE_MESSAGE_DEFAULT } from '../../constants';
 
 export default {
   computed: {
@@ -222,26 +217,6 @@ export default {
           })
           .catch((error) => console.log(error));
       }
-    },
-    coverImageProfil(url) {
-      if (url !== '') {
-        try {
-          url = require('@/assets/img/profiles/' + url);
-        } catch (e) {
-          url = IMAGE_PROFILE_DEFAULT; // Default image.
-        }
-      } else url = IMAGE_PROFILE_DEFAULT; // Default image.
-      return url;
-    },
-    coverImageMessage(url) {
-      if (url !== '') {
-        try {
-          url = require('@/assets/img/messages/' + url);
-        } catch (e) {
-          url = IMAGE_MESSAGE_DEFAULT; // Default image.
-        }
-      } else url = IMAGE_MESSAGE_DEFAULT; // Default image.
-      return url;
     },
     newComment(data) {
       console.log(data);
