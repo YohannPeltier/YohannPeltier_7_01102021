@@ -12,7 +12,7 @@ exports.createMessage = (req, res, next) => {
   if (userId < 0) return res.status(400).json({ error: 'wrong token' });
 
   // Params
-  const content = req.body.content;
+  let content = req.body.content;
   const file = req.file;
 
   if (content == null) {
@@ -22,6 +22,10 @@ exports.createMessage = (req, res, next) => {
   if (content.length < config.CONTENT_LIMIT_MIN) {
     return res.status(400).json({ error: 'invalid parameters' });
   }
+
+  content = content
+    .replace(/(\r\n|\r|\n){2}/g, '$1')
+    .replace(/(\r\n|\r|\n){3,}/g, '$1\n');
 
   asyncLib.waterfall(
     [
@@ -78,7 +82,7 @@ exports.listMessages = (req, res, next) => {
   }
 
   models.Message.findAll({
-    order: [order != null ? order.split(':') : ['id', 'DESC']],
+    order: [order != null ? order.split(':') : ['createdAt', 'DESC']],
     attributes: fields !== '*' && fields != null ? fields.split(',') : null,
     limit: !isNaN(limit) ? limit : null,
     offset: !isNaN(offset) ? offset : null,
