@@ -59,7 +59,7 @@ img {
 
 <script>
 import { mapGetters } from 'vuex';
-import { IMAGE_PROFILE_DEFAULT } from '../constants';
+import { IMAGE_PROFILE_DEFAULT } from '../../../constants';
 
 export default {
   computed: {

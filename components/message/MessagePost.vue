@@ -83,7 +83,7 @@ export default {
     BIcon,
     BIconImage,
   },
-  props: [],
+  name: 'PostMessage',
   data: function () {
     return {
       content: '',

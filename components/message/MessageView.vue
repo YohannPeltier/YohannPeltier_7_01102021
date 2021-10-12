@@ -87,7 +87,7 @@
         </div>
       </b-list-group-item>
       <template v-if="isComments">
-        <Comment
+        <MessageCommentView
           v-for="comment in comments"
           :key="comment.id"
           :id="comment.id"
@@ -95,8 +95,8 @@
           :user="comment.User"
           :content="comment.content"
           :createdAt="comment.createdAt"
-        ></Comment>
-        <PostComment :id="id"></PostComment>
+        ></MessageCommentView>
+        <MessageCommentPost :id="id"></MessageCommentPost>
       </template>
     </b-list-group>
   </b-card>
@@ -138,7 +138,7 @@ img {
 <script>
 import { BIcon, BIconHandThumbsUp, BIconChatSquareText } from 'bootstrap-vue';
 import { mapGetters } from 'vuex';
-import { IMAGE_PROFILE_DEFAULT, IMAGE_MESSAGE_DEFAULT } from '../constants';
+import { IMAGE_PROFILE_DEFAULT, IMAGE_MESSAGE_DEFAULT } from '../../constants';
 
 export default {
   computed: {
