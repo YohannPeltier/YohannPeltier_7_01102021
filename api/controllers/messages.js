@@ -85,10 +85,10 @@ exports.listMessages = (req, res, next) => {
   models.Message.findAll({
     order: [order != null ? order.split(':') : ['createdAt', 'DESC']],
     attributes: fields !== '*' && fields != null ? fields.split(',') : null,
-    where: {
-      [where != null ? where.split(':')[0] : null]:
-        where != null ? where.split(':')[1] : null,
-    },
+    whereReq:
+      where != null
+        ? '{where' + where.split(':')[0] + ':' + where.split(':')[1] + '}'
+        : '',
     limit: !isNaN(limit) ? limit : null,
     offset: !isNaN(offset) ? offset : null,
     include: [
