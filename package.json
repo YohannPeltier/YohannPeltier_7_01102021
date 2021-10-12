@@ -25,6 +25,7 @@
     "sequelize": "^6.6.5"
   },
   "devDependencies": {
+    "@nuxt/image": "^0.6.0",
     "@vue/test-utils": "^1.2.1",
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^27.0.5",

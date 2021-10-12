@@ -24,7 +24,7 @@ export default {
   components: true,
 
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
-  buildModules: [],
+  buildModules: ['@nuxt/image'],
 
   // Server Middleware
   serverMiddleware: [
@@ -39,7 +39,39 @@ export default {
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
     '@nuxtjs/auth',
+    '@nuxt/image',
   ],
+
+  image: {
+    dir: 'assets/img',
+    screens: {
+      sm: 576,
+      md: 768,
+      lg: 992,
+      xl: 1200,
+    },
+    presets: {
+      profileMessage: {
+        modifiers: {
+          fit: 'cover',
+          width: 43,
+          height: 43,
+        },
+      },
+      profile: {
+        modifiers: {
+          fit: 'cover',
+          width: 150,
+          height: 150,
+        },
+      },
+      message: {
+        modifiers: {
+          fit: 'cover',
+        },
+      },
+    },
+  },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
