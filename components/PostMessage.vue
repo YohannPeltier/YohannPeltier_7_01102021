@@ -7,14 +7,15 @@
     <b-card
       tag="article"
       footer-tag="footer"
-      class="shadow-sm mx-auto mt-3 mb-5 w-9"
+      class="shadow-sm mx-auto mt-3 mb-4 w-9"
     >
       <b-card-text class="p-0">
         <b-form-textarea
           v-model="content"
           placeholder="Exprimez-vous"
           rows="3"
-          no-resize
+          max-rows="8"
+          maxlength="255"
           required
         ></b-form-textarea>
       </b-card-text>
@@ -76,12 +77,8 @@ textarea {
 
 <script>
 import { BIcon, BIconImage } from 'bootstrap-vue';
-import { mapGetters } from 'vuex';
 
 export default {
-  computed: {
-    ...mapGetters(['loggedInUser']),
-  },
   components: {
     BIcon,
     BIconImage,
@@ -95,19 +92,20 @@ export default {
   },
   methods: {
     async postMessage() {
-      try {
-        const formData = new FormData();
-        formData.append('content', this.content);
-        formData.append('messageImage', this.image);
+      const formData = new FormData();
+      formData.append('content', this.content);
+      formData.append('messageImage', this.image);
 
-        let res = await this.$axios.post('messages/create', formData);
-
-        this.content = '';
-        this.image = null;
-        this.$parent.newMessage(res.data);
-      } catch (e) {
-        if (e.response.data.error !== '') console.log(e);
-      }
+      await this.$axios
+        .post('messages/create', formData)
+        .then((res) => {
+          this.content = '';
+          this.image = null;
+          this.$parent.newMessage(res.data);
+        })
+        .catch((error) => {
+          if (error.response.data.error !== '') console.log(error);
+        });
     },
     onChangeImage() {
       const file = this.$refs.image.files[0];
