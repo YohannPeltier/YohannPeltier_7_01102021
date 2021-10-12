@@ -6,17 +6,18 @@
     <template v-else>
       <PostMessage />
       <Message
-        v-for="(message, index) in messages"
-        :key="index"
+        v-for="message in messages"
+        :key="message.id"
         :id="message.id"
         :userId="message.UserId"
         :user="message.User"
         :content="message.content"
         :attachement="message.attachement"
         :likes="message.likes"
+        :nbComments="message.comments"
         :usersLikes="message.Likes"
         :createdAt="message.createdAt"
-      />
+      ></Message>
     </template>
   </section>
 </template>
@@ -28,6 +29,7 @@ export default {
   data() {
     return {
       messages: [],
+      key: 0,
       loading: true,
       errored: false,
     };
@@ -46,11 +48,11 @@ export default {
   },
   methods: {
     newMessage(data) {
-      data.User = [
-        this.loggedInUser.firstname,
-        this.loggedInUser.lastname,
-        this.loggedInUser.picture,
-      ];
+      data.User = {
+        firstname: this.loggedInUser.firstname,
+        lastname: this.loggedInUser.lastname,
+        picture: this.loggedInUser.picture,
+      };
       data.Likes = [];
       this.messages.unshift(data);
     },

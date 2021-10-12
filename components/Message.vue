@@ -1,5 +1,6 @@
 <template>
   <b-card
+    no-body
     tag="article"
     header-tag="header"
     footer-tag="footer"
@@ -33,51 +34,71 @@
         </div>
       </div>
     </template>
-    <b-card-text>
-      {{ content }}
-    </b-card-text>
-    <b-card-text v-if="attachement" class="ml-n2 mr-n2 mb-n2 text-center">
-      <b-img :src="coverImageMessage(attachement)" class="img-message" fluid />
-    </b-card-text>
-    <template #footer>
-      <div class="row gap-3 ml-n2 mr-n2">
-        <b-button
-          @click="like"
-          ref="like"
-          variant="light"
-          aria-label="J'aime"
-          class="
-            col
-            d-inline-flex
-            justify-content-center
-            align-items-center
-            line-height-3
-          "
-          :class="{ 'text-primary': isLike }"
-        >
-          <b-icon icon="hand-thumbs-up" aria-hidden="true"></b-icon>
-          <span v-if="likesCounter" class="ml-2">
-            {{ likesCounter }}
-          </span>
-        </b-button>
-        <b-button
-          @click="comment"
-          ref="comment"
-          variant="light"
-          aria-label="Commenter"
-          class="
-            col
-            d-inline-flex
-            justify-content-center
-            align-items-center
-            line-height-3
-          "
-        >
-          <b-icon icon="chat-square-text" aria-hidden="true"></b-icon>
-          <span v-if="commentsCounter" class="ml-3">{{ commentsCounter }}</span>
-        </b-button>
-      </div>
-    </template>
+    <b-card-body>
+      <b-card-text class="content-message">{{ content }}</b-card-text>
+      <b-card-text v-if="attachement" class="ml-n2 mr-n2 mb-n2 text-center">
+        <b-img
+          :src="coverImageMessage(attachement)"
+          class="img-message"
+          fluid
+        />
+      </b-card-text>
+    </b-card-body>
+    <b-list-group flush>
+      <b-list-group-item class="footer">
+        <div class="row gap-3 ml-n2 mr-n2">
+          <b-button
+            @click="like"
+            ref="like"
+            variant="light"
+            aria-label="J'aime"
+            class="
+              col
+              d-inline-flex
+              justify-content-center
+              align-items-center
+              line-height-3
+            "
+            :class="{ 'text-primary': isLike }"
+          >
+            <b-icon icon="hand-thumbs-up" aria-hidden="true"></b-icon>
+            <span v-if="likesCounter" class="ml-2">
+              {{ likesCounter }}
+            </span>
+          </b-button>
+          <b-button
+            @click="comment"
+            ref="comment"
+            variant="light"
+            aria-label="Commenter"
+            class="
+              col
+              d-inline-flex
+              justify-content-center
+              align-items-center
+              line-height-3
+            "
+          >
+            <b-icon icon="chat-square-text" aria-hidden="true"></b-icon>
+            <span v-if="commentsCounter" class="ml-3">
+              {{ commentsCounter }}
+            </span>
+          </b-button>
+        </div>
+      </b-list-group-item>
+      <template v-if="isComments">
+        <Comment
+          v-for="comment in comments"
+          :key="comment.id"
+          :id="comment.id"
+          :userId="comment.UserId"
+          :user="comment.User"
+          :content="comment.content"
+          :createdAt="comment.createdAt"
+        ></Comment>
+        <PostComment :id="id"></PostComment>
+      </template>
+    </b-list-group>
   </b-card>
 </template>
 
@@ -96,6 +117,10 @@
 }
 </style>
 <style scoped>
+.content-message {
+  white-space: pre-line;
+  line-height: 1.3rem;
+}
 .img-message {
   width: auto;
   height: auto;
@@ -103,6 +128,10 @@
 }
 img {
   object-fit: cover;
+}
+.footer {
+  padding: 0.75rem 1.25rem;
+  background-color: rgba(0, 0, 0, 0.03);
 }
 </style>
 
@@ -127,6 +156,7 @@ export default {
     'content',
     'attachement',
     'likes',
+    'nbComments',
     'createdAt',
     'usersLikes',
   ],
@@ -151,7 +181,8 @@ export default {
       }),
       likesCounter: this.likes <= 0 ? null : this.likes,
       isLike: false,
-      commentsCounter: null,
+      commentsCounter: this.nbComments <= 0 ? null : this.nbComments,
+      isComments: false,
     };
   },
   methods: {
@@ -162,22 +193,34 @@ export default {
         }
       });
     },
-    like() {
+    async like() {
       this.$refs.like.blur();
       if (this.isLike === true) {
-        this.$axios.post(`messages/${this.id}/dislike`).then(() => {
+        await this.$axios.post(`messages/${this.id}/dislike`).then(() => {
           this.isLike = false;
           this.likesCounter--;
         });
       } else {
-        this.$axios.post(`messages/${this.id}/like`).then(() => {
+        await this.$axios.post(`messages/${this.id}/like`).then(() => {
           this.isLike = true;
           this.likesCounter++;
         });
       }
     },
-    comment() {
+    async comment() {
       this.$refs.comment.blur();
+      if (this.isComments === true) {
+        this.isComments = false;
+      } else {
+        await this.$axios
+          .$get(`messages/${this.id}/comments`)
+          .then((res) => {
+            console.log(res);
+            this.comments = res;
+            this.isComments = true;
+          })
+          .catch((error) => console.log(error));
+      }
     },
     coverImageProfil(url) {
       if (url !== '') {
@@ -198,6 +241,17 @@ export default {
         }
       } else url = IMAGE_MESSAGE_DEFAULT; // Default image.
       return url;
+    },
+    newComment(data) {
+      console.log(data);
+      data.User = {
+        firstname: this.loggedInUser.firstname,
+        lastnbame: this.loggedInUser.lastname,
+        picture: this.loggedInUser.picture,
+      };
+      console.log(data);
+      this.comments.push(data);
+      this.commentsCounter++;
     },
   },
   beforeMount() {
