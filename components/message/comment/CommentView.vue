@@ -11,7 +11,9 @@
       <div class="ml-2 flex-grow-1 py-2 px-3 rounded comment">
         <div class="d-flex align-items-baseline">
           <h6 class="mb-0 font-size-n1">
-            <b-link class="text-dark" :to="`/users/${userId}`"
+            <b-link
+              class="text-dark"
+              :to="`/users/${userId === loggedInUser.id ? 'Profile' : userId}`"
               >{{ user.firstname }} {{ user.lastname }}</b-link
             >
           </h6>

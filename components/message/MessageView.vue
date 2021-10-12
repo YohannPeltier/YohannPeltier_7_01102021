@@ -3,7 +3,6 @@
     no-body
     tag="article"
     header-tag="header"
-    footer-tag="footer"
     class="shadow-sm mx-auto mt-3 w-9"
   >
     <template #header>
@@ -17,7 +16,9 @@
         />
         <div class="ml-2">
           <h6 class="mb-0">
-            <b-link class="text-dark" :to="`/users/${userId}`"
+            <b-link
+              class="text-dark"
+              :to="`/users/${userId === loggedInUser.id ? 'Profile' : userId}`"
               >{{ user.firstname }} {{ user.lastname }}</b-link
             >
           </h6>
