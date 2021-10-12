@@ -21,6 +21,7 @@
 import { mapGetters } from 'vuex';
 
 export default {
+  props: ['userId'],
   data() {
     return {
       messages: [],
@@ -31,7 +32,7 @@ export default {
   },
   async fetch() {
     await this.$axios
-      .$get('messages')
+      .$get(`messages${this.userId ? '/?where=userId:' + this.userId : ''}`)
       .then((res) => {
         this.messages = res;
       })
