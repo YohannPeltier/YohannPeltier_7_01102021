@@ -1,6 +1,5 @@
 <template>
   <div>
-    <MessagePost></MessagePost>
     <MessageView
       v-for="message in messages"
       :key="message.id"

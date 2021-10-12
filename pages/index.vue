@@ -4,6 +4,7 @@
       <h1 class="text-center mt-5">Bienvenue sur Groupomania</h1>
     </template>
     <template v-else>
+      <MessagePost></MessagePost>
       <MessageViewAll></MessageViewAll>
     </template>
   </section>
