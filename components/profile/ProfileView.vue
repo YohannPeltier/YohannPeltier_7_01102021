@@ -30,7 +30,7 @@
           ></nuxt-img>
           <h3>{{ firstname }} {{ lastname }}</h3>
           <b-link
-            v-if="isOveredProfile === true && isMe"
+            v-if="isOveredProfile === true && (isMe || loggedInUser.isAdmin)"
             @click="deleteProfile"
             :aria-label="`Supprimer`"
             class="text-danger position-absolute mt-2 top-0 right-0 h4"
@@ -232,8 +232,8 @@ export default {
     },
     async deleteProfile() {
       await this.$axios.delete(`users/${this.id}`).then(async (res) => {
+        if (this.id === this.loggedInUser.id) await this.$auth.logout();
         await this.$router.push('/');
-        await this.$auth.logout();
       });
     },
   },

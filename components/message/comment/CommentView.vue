@@ -27,10 +27,9 @@
               >{{ user.firstname }} {{ user.lastname }}</b-link
             >
           </h6>
-          <div class="line-height-3">
-            <span aria-hidden="true" class="ml-2 line-height-3">.</span>
+          <div class="line-height-3 d-inline-flex mr-2">
             <b-link :id="`message-tooltip-${id}`" class="text-muted">
-              <small class="ml-1">{{ date }}</small>
+              <small class="ml-3 text-truncate">{{ date }}</small>
             </b-link>
           </div>
           <b-tooltip
@@ -41,7 +40,10 @@
             le {{ dateLong }} à {{ time }}
           </b-tooltip>
           <b-link
-            v-if="isOveredComment === true && userId === loggedInUser.id"
+            v-if="
+              isOveredComment === true &&
+              (userId === loggedInUser.id || loggedInUser.isAdmin)
+            "
             @click="deleteComment"
             aria-label="Supprimer"
             class="text-danger ml-auto my-n1 font-size-n1"

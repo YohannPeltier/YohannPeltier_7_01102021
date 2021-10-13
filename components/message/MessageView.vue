@@ -44,7 +44,10 @@
           </b-tooltip>
         </div>
         <b-link
-          v-if="isOveredMessage === true && userId === loggedInUser.id"
+          v-if="
+            isOveredMessage === true &&
+            (userId === loggedInUser.id || loggedInUser.isAdmin)
+          "
           @click="deleteMessage"
           aria-label="Supprimer"
           class="text-danger ml-auto"
