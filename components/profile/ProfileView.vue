@@ -19,7 +19,7 @@
           ></nuxt-img>
           <nuxt-img
             v-else
-            :src="`static/img/defaults/default_profile.jpeg`"
+            :src="`static/defaults/default_profile.jpeg`"
             preset="profile"
             class="rounded-circle"
             :alt="`Image de profil de ${firstname} ${lastname}`"
