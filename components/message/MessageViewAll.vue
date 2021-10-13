@@ -1,5 +1,6 @@
 <template>
   <div>
+    <MessagePost v-if="viewPostMessage"></MessagePost>
     <MessageView
       v-for="message in messages"
       :key="message.id"
@@ -20,7 +21,7 @@
 import { mapGetters } from 'vuex';
 
 export default {
-  props: ['userId'],
+  props: ['profileUserId', 'viewPostMessage'],
   data() {
     return {
       messages: [],
@@ -31,8 +32,13 @@ export default {
   },
   async fetch() {
     await this.$axios
-      .$get(`messages${this.userId ? '/?where=userId:' + this.userId : ''}`)
+      .$get(
+        `messages${
+          this.profileUserId ? '/?where=userId:' + this.profileUserId : ''
+        }`
+      )
       .then((res) => {
+        console.log(this.viewPostMessage);
         this.messages = res;
       })
       .catch((error) => (this.errored = true))
@@ -43,6 +49,7 @@ export default {
   },
   methods: {
     newMessage(data) {
+      console.log(data);
       data.User = {
         firstname: this.loggedInUser.firstname,
         lastname: this.loggedInUser.lastname,

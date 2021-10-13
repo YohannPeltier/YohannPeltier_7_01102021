@@ -4,7 +4,19 @@
       <h1 class="text-center mt-5">Bienvenue sur Groupomania</h1>
     </template>
     <template v-else>
-      <ProfileView></ProfileView>
+      <ProfileView
+        :id="loggedInUser.id"
+        :firstname="loggedInUser.firstname"
+        :lastname="loggedInUser.lastname"
+        :picture="loggedInUser.picture"
+        :email="loggedInUser.email"
+        :bio="loggedInUser.bio"
+        :isMe="true"
+      ></ProfileView>
+      <MessageViewAll
+        :userId="loggedInUser.id"
+        :viewPostMessage="true"
+      ></MessageViewAll>
     </template>
   </section>
 </template>
@@ -18,7 +30,7 @@ import { mapGetters } from 'vuex';
 export default {
   middleware: 'auth',
   computed: {
-    ...mapGetters(['isAuthenticated']),
+    ...mapGetters(['isAuthenticated', 'loggedInUser']),
   },
 };
 </script>
