@@ -83,6 +83,13 @@ exports.createMessage = async (req, res, next) => {
 
 // List messages
 exports.listMessages = (req, res, next) => {
+  const headerAuth = req.headers['authorization'];
+  const userId = auth.getUserId(headerAuth);
+
+  if (userId < 0) {
+    return res.status(400).json({ error: 'wrong token' });
+  }
+
   const fields = req.query.fields;
   const where = req.query.where;
   const limit = parseInt(req.query.limit);
