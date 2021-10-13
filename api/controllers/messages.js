@@ -96,18 +96,12 @@ exports.listMessages = (req, res, next) => {
   const offset = parseInt(req.query.offset);
   const order = req.query.order;
 
-  if (limit > config.ITEMS_LIMIT) {
-    limit = config.ITEMS_LIMIT;
-  }
-
   models.Message.findAll({
     order: [order != null ? order.split(':') : ['createdAt', 'DESC']],
     attributes: fields !== '*' && fields != null ? fields.split(',') : null,
-    whereReq:
-      where != null
-        ? '{where' + where.split(':')[0] + ':' + where.split(':')[1] + '}'
-        : '',
-    limit: !isNaN(limit) ? limit : null,
+    where: where != null ? { [where.split(':')[0]]: where.split(':')[1] } : '',
+    limit:
+      limit > 0 && limit <= config.ITEMS_LIMIT ? limit : config.ITEMS_LIMIT,
     offset: !isNaN(offset) ? offset : null,
     include: [
       {
@@ -119,6 +113,7 @@ exports.listMessages = (req, res, next) => {
         model: models.Like,
         as: 'Likes',
         attributes: ['MessageId', 'UserId', 'isLike'],
+        separate: true,
       },
     ],
   })
