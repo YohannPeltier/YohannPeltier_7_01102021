@@ -55,13 +55,11 @@
               <b-button
                 @click="modifyEmailEvent"
                 :variant="modifyEmail.variant"
+                :aria-label="modifyEmail.aria"
                 size="sm"
                 class="ml-auto"
               >
-                <b-icon
-                  :icon="modifyEmail.icon"
-                  :aria-label="modifyEmail.aria"
-                ></b-icon>
+                <b-icon :icon="modifyEmail.icon"></b-icon>
               </b-button>
             </div>
           </b-form>
@@ -98,13 +96,11 @@
               @click="modifyBioEvent"
               :variant="modifyBio.variant"
               v-if="isMe"
+              :aria-label="modifyBio.aria"
               size="sm"
               class="ml-auto"
             >
-              <b-icon
-                :icon="modifyBio.icon"
-                :aria-label="modifyBio.aria"
-              ></b-icon>
+              <b-icon :icon="modifyBio.icon"></b-icon>
             </b-button>
           </div>
         </b-list-group-item>

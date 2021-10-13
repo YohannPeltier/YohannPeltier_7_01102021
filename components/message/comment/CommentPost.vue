@@ -11,7 +11,13 @@
         maxlength="255"
         required
       ></b-form-input>
-      <b-button type="submit" variant="primary" size="sm" class="px-4">
+      <b-button
+        type="submit"
+        variant="primary"
+        size="sm"
+        class="px-4"
+        aria-label="Envoyer le commentaire"
+      >
         Envoyer
       </b-button>
     </b-form>

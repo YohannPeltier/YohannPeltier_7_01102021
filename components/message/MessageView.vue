@@ -64,8 +64,8 @@
           <b-button
             @click="like"
             ref="like"
+            :aria-label="likeAria"
             variant="light"
-            aria-label="J'aime"
             class="
               col
               d-inline-flex
@@ -83,8 +83,12 @@
           <b-button
             @click="comment"
             ref="comment"
+            :aria-label="
+              isComments
+                ? 'Masquer les commentaires'
+                : 'Afficher les commentaires et commenter'
+            "
             variant="light"
-            aria-label="Commenter"
             class="
               col
               d-inline-flex
@@ -193,6 +197,7 @@ export default {
       }),
       likesCounter: this.likes <= 0 ? null : this.likes,
       isLike: false,
+      likeAria: "J'aime",
       commentsCounter: this.nbComments <= 0 ? null : this.nbComments,
       isComments: false,
     };
@@ -218,11 +223,13 @@ export default {
       if (this.isLike === true) {
         await this.$axios.post(`messages/${this.id}/dislike`).then(() => {
           this.isLike = false;
+          this.likeAria = "J'aime";
           this.likesCounter--;
         });
       } else {
         await this.$axios.post(`messages/${this.id}/like`).then(() => {
           this.isLike = true;
+          this.likeAria = "Je n'aime plus";
           this.likesCounter++;
         });
       }
@@ -235,7 +242,6 @@ export default {
         await this.$axios
           .$get(`messages/${this.id}/comments`)
           .then((res) => {
-            console.log(res);
             this.comments = res;
             this.isComments = true;
           })
