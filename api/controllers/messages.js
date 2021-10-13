@@ -138,19 +138,30 @@ exports.deleteMessage = (req, res, next) => {
   asyncLib.waterfall(
     [
       function (done) {
-        models.Message.findOne({
-          where: { id: messageId },
+        models.User.findOne({
+          where: { id: userId },
         })
-          .then(function (messageFound) {
-            done(null, messageFound);
+          .then(function (userFound) {
+            done(null, userFound);
           })
           .catch(function (err) {
             return res.status(500).json({ error: 'unable to verify message' });
           });
       },
-      function (messageFound, done) {
+      function (userFound, done) {
+        models.Message.findOne({
+          where: { id: messageId },
+        })
+          .then(function (messageFound) {
+            done(null, userFound, messageFound);
+          })
+          .catch(function (err) {
+            return res.status(500).json({ error: 'unable to verify message' });
+          });
+      },
+      function (userFound, messageFound, done) {
         if (messageFound) {
-          if (userId == messageFound.userId) {
+          if (userId == messageFound.userId || userFound.isAdmin == 1) {
             messageFound
               .destroy()
               .then(function () {

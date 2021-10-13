@@ -168,23 +168,34 @@ exports.deleteComment = (req, res, next) => {
           });
       },
       function (messageFound, userFound, done) {
-        if (userFound.id == userId) {
+        models.Comment.findOne({
+          where: { id: commentId },
+        })
+          .then(function (commentFound) {
+            done(null, messageFound, userFound, commentFound);
+          })
+          .catch(function (err) {
+            return res.status(500).json({ error: 'unable to verify user' });
+          });
+      },
+      function (messageFound, userFound, commentFound, done) {
+        if (commentFound.userId == userId || userFound.isAdmin == 1) {
           models.Comment.destroy({
             where: { id: commentId },
           }).then(function () {
-            done(null, messageFound, userFound, { id: commentId });
+            done(null, messageFound, userFound, commentFound);
           });
         } else {
-          res.status(404).json({ error: 'user not found' });
+          return res.status(404).json({ error: 'user not found' });
         }
       },
-      function (messageFound, userFound, commentIdObj, done) {
+      function (messageFound, userFound, commentFound, done) {
         messageFound
           .update({
             comments: messageFound.comments - 1,
           })
           .then(function () {
-            done(commentIdObj);
+            done(commentFound);
           })
           .catch(function (err) {
             return res

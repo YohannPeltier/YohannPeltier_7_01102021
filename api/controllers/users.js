@@ -163,8 +163,8 @@ exports.login = (req, res, next) => {
 exports.getUserProfile = (req, res, next) => {
   // Getting auth header
   const headerAuth = req.headers['authorization'];
-  const userId = auth.getUserId(headerAuth);
-  let attributes = ['id', 'firstname', 'lastname', 'picture', 'bio'];
+  let userId = auth.getUserId(headerAuth);
+  let attributes = ['id', 'firstname', 'lastname', 'picture', 'bio', 'isAdmin'];
   const paramsUserId = parseInt(req.params.id);
 
   if (userId < 0) {
@@ -172,6 +172,8 @@ exports.getUserProfile = (req, res, next) => {
   } else if (userId === paramsUserId || !paramsUserId) {
     attributes.push('email');
   }
+
+  userId = paramsUserId ? paramsUserId : userId;
 
   models.User.findOne({
     attributes: attributes,
@@ -217,7 +219,7 @@ exports.deleteUserProfile = (req, res, next) => {
           });
       },
       function (userFound, done) {
-        if (userFound) {
+        if (userFound.id == userId || userFound.isAdmin == 1) {
           fs.unlink(userFound.picture, () => {});
           models.Message.findAll({
             where: { userId: userId },
