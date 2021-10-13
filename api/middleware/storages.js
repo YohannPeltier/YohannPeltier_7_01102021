@@ -40,7 +40,6 @@ exports.multerProfile = multer({
 
 exports.multerMessage = multer({
   storage: storageMessage,
-  limits: { fileSize: config.LIMIT_SIZE },
 });
 
 export default {};
