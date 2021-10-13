@@ -11,7 +11,7 @@ const readFileAsync = async (file) => {
   });
 };
 
-exports.correctOrientation = async (dir, image) => {
+exports.correctOrientation = async (image) => {
   let imageOrientation = false;
   let rotateDeg = 0;
 
@@ -19,22 +19,17 @@ exports.correctOrientation = async (dir, image) => {
     config.ALLOWED_TYPES[image.mimetype] === 'jpg' ||
     config.ALLOWED_TYPES[image.mimetype] === 'jpeg'
   ) {
-    const buffer = modifyExif(
-      await readFileAsync(`${dir}/${image.filename}`),
-      (data) => {
-        imageOrientation =
-          data && data['0th'] && data['0th']['274']
-            ? data['0th']['274']
-            : false;
-        if (imageOrientation) {
-          if (imageOrientation === 1) {
-            imageOrientation = false;
-          } else {
-            data['0th']['274'] = 1; // reset EXIF orientation value
-          }
+    const buffer = modifyExif(await readFileAsync(`${image.path}`), (data) => {
+      imageOrientation =
+        data && data['0th'] && data['0th']['274'] ? data['0th']['274'] : false;
+      if (imageOrientation) {
+        if (imageOrientation === 1) {
+          imageOrientation = false;
+        } else {
+          data['0th']['274'] = 1; // reset EXIF orientation value
         }
       }
-    );
+    });
 
     if (imageOrientation) {
       switch (imageOrientation) {
@@ -58,7 +53,7 @@ exports.correctOrientation = async (dir, image) => {
         }
         lenna
           .rotate(rotateDeg) // correct orientation
-          .writeAsync(`${dir}/${image.filename}`); // save
+          .writeAsync(`${image.path}`); // save
       });
     }
   }

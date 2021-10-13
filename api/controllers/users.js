@@ -22,7 +22,7 @@ exports.signup = async (req, res, next) => {
   const bio = req.body.bio;
 
   if (file) {
-    await correctOrientation(config.ROUTE_IMAGES_PROFILES, file);
+    await correctOrientation(file);
   }
 
   if (
@@ -60,13 +60,13 @@ exports.signup = async (req, res, next) => {
             return res.status(500).json({ error: 'unable to verify user' });
           });
       },
-      async function (userFound, done) {
+      function (userFound, done) {
         if (!userFound) {
           bcrypt.hash(password, 5, function (err, bcryptedPassword) {
             done(null, userFound, bcryptedPassword);
           });
         } else {
-          await unlinkAsync(req.file.path);
+          async () => await unlinkAsync(req.file.path);
           return res.status(409).json({ error: 'user already exist' });
         }
       },

@@ -24,7 +24,7 @@ exports.createMessage = async (req, res, next) => {
   const file = req.file;
 
   if (file) {
-    await correctOrientation(config.ROUTE_IMAGES_MESSAGES, file);
+    await correctOrientation(file);
   }
 
   if (content == null && file == null) {
@@ -50,11 +50,9 @@ exports.createMessage = async (req, res, next) => {
             return res.status(500).json({ error: 'unable to verify user' });
           });
       },
-      async function (userFound, done) {
+      function (userFound, done) {
         let image = null;
-        console.log(file);
         if (file) {
-          console.log(file.filename);
           image = file.filename;
         }
         if (userFound) {
@@ -67,7 +65,7 @@ exports.createMessage = async (req, res, next) => {
             done(newMessage);
           });
         } else {
-          await unlinkAsync(req.file.path);
+          async () => await unlinkAsync(req.file.path);
           res.status(404).json({ error: 'user not found' });
         }
       },

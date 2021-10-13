@@ -12,6 +12,7 @@ function customStorage(opts) {
 customStorage.prototype._handleFile = function _handleFile(req, file, cb) {
   this.getDestination(req, file, function (err, path) {
     if (err) return cb(err);
+    console.log(path);
     var outStream = fs.createWriteStream(path);
     file.stream.pipe(outStream);
     outStream.on('error', cb);
