@@ -27,7 +27,6 @@ const storageProfile = customStorage({
 
 const storageMessage = customStorage({
   destination: (req, file, cb) => {
-    console.log(`${config.ROUTE_IMAGES_MESSAGES}/${createFileName(file)}`);
     cb(null, `${config.ROUTE_IMAGES_MESSAGES}/${createFileName(file)}`); // Image storage folder
   },
   fileFilter: fileFilerStorage,

@@ -17,8 +17,8 @@ const sequelize = new Sequelize(
 );
 sequelize
   .authenticate()
-  .then(() => console.log('Connexion à mariabd réussie !'))
-  .catch(() => console.log('Connexion à mariabd échouée !'));
+  .then(() => console.log('Connexion à mysql réussie !'))
+  .catch(() => console.log('Connexion à mysql échouée !'));
 
 // Instantiate server
 const app = express();

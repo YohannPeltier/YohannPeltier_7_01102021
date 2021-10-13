@@ -2,14 +2,10 @@
 const bcrypt = require('bcrypt');
 const asyncLib = require('async');
 const fs = require('fs');
-const { promisify } = require('util');
 const { config } = require('../config');
 const models = require('../models');
-
 const auth = require('../middleware/auth');
 const { correctOrientation } = require('../middleware/orientation');
-
-const unlinkAsync = promisify(fs.unlink);
 
 // SignUp
 exports.signup = async (req, res, next) => {
@@ -31,7 +27,7 @@ exports.signup = async (req, res, next) => {
     lastname == null ||
     password == null
   ) {
-    await unlinkAsync(req.file.path);
+    if (file) fs.unlink(file.path, () => {});
     return res.status(400).json({ error: 'missing parameters' });
   }
 
@@ -41,7 +37,7 @@ exports.signup = async (req, res, next) => {
     !config.EMAIL_REGEX.test(email) ||
     !config.PASSWORD_REGEX.test(password)
   ) {
-    await unlinkAsync(req.file.path);
+    if (file) fs.unlink(file.path, () => {});
     return res.status(400).json({ error: 'invalid parameters' });
   }
 
@@ -56,7 +52,7 @@ exports.signup = async (req, res, next) => {
             done(null, userFound);
           })
           .catch(async function (err) {
-            await unlinkAsync(req.file.path);
+            if (file) fs.unlink(file.path, () => {});
             return res.status(500).json({ error: 'unable to verify user' });
           });
       },
@@ -66,7 +62,7 @@ exports.signup = async (req, res, next) => {
             done(null, userFound, bcryptedPassword);
           });
         } else {
-          async () => await unlinkAsync(req.file.path);
+          if (file) fs.unlink(file.path, () => {});
           return res.status(409).json({ error: 'user already exist' });
         }
       },
@@ -88,7 +84,7 @@ exports.signup = async (req, res, next) => {
             done(newUser);
           })
           .catch(async function (err) {
-            await unlinkAsync(req.file.path);
+            if (file) fs.unlink(file.path, () => {});
             return res.status(500).json({ error: 'cannot add user' });
           });
       },
@@ -99,7 +95,7 @@ exports.signup = async (req, res, next) => {
           userId: newUser.id,
         });
       } else {
-        await unlinkAsync(req.file.path);
+        if (file) fs.unlink(file.path, () => {});
         return res.status(500).json({ error: 'cannot add user' });
       }
     }
@@ -167,7 +163,7 @@ exports.login = (req, res, next) => {
 exports.getUserProfile = (req, res, next) => {
   // Getting auth header
   const headerAuth = req.headers['authorization'];
-  let userId = auth.getUserId(headerAuth);
+  const userId = auth.getUserId(headerAuth);
   let attributes = ['id', 'firstname', 'lastname', 'picture', 'bio'];
   const paramsUserId = parseInt(req.params.id);
 
@@ -176,7 +172,6 @@ exports.getUserProfile = (req, res, next) => {
   } else if (userId === paramsUserId || !paramsUserId) {
     attributes.push('email');
   }
-  userId = paramsUserId ? paramsUserId : userId;
 
   models.User.findOne({
     attributes: attributes,
@@ -192,6 +187,85 @@ exports.getUserProfile = (req, res, next) => {
     .catch(function (error) {
       res.status(500).json({ error: 'cannot fetch user' });
     });
+};
+
+// Get user profile
+exports.deleteUserProfile = (req, res, next) => {
+  // Getting auth header
+  const headerAuth = req.headers['authorization'];
+  let userId = auth.getUserId(headerAuth);
+
+  const paramsUserId = parseInt(req.params.id);
+
+  if (userId < 0) {
+    return res.status(400).json({ error: 'wrong token' });
+  }
+
+  userId = paramsUserId ? paramsUserId : userId;
+
+  asyncLib.waterfall(
+    [
+      function (done) {
+        models.User.findOne({
+          where: { id: userId },
+        })
+          .then(function (userFound) {
+            done(null, userFound);
+          })
+          .catch(function (err) {
+            return res.status(500).json({ error: 'unable to verify user' });
+          });
+      },
+      function (userFound, done) {
+        if (userFound) {
+          fs.unlink(userFound.picture, () => {});
+          models.Message.findAll({
+            where: { userId: userId },
+          })
+            .then(function (messagesFound) {
+              done(null, userFound, messagesFound);
+            })
+            .catch(function (err) {
+              return res
+                .status(500)
+                .json({ error: 'unable to verify message' });
+            });
+        } else {
+          return res.status(500).json({ error: 'cannot fetch user' });
+        }
+      },
+      function (userFound, messagesFound, done) {
+        if (messagesFound) {
+          let messages = messagesFound.map(function (message) {
+            return message.toJSON();
+          });
+          for (let index in messages) {
+            if (messages[index].attachement) {
+              fs.unlink(messages[index].attachement, () => {});
+            }
+          }
+          userFound
+            .destroy()
+            .then(function () {
+              done(userFound);
+            })
+            .catch(function (error) {
+              console.error(error);
+              return res.status(500).json({ error: 'cannot delete user' });
+            });
+        } else {
+          return res.status(500).json({ error: 'no message found' });
+        }
+      },
+    ],
+    function (userFound) {
+      if (userFound) {
+        return res.status(200).json(userFound);
+      } else {
+        return res.status(500).json({ error: 'cannot delete user' });
+      }
+    }
+  );
 };
 
 // Update user profile

@@ -6,8 +6,6 @@ const usersCtrl = require('../controllers/users');
 
 const { multerProfile } = require('../middleware/storages');
 
-//console.log(multer.profileImage);
-
 // Routes
 router.post(
   '/signup',
@@ -18,6 +16,7 @@ router.post('/login', usersCtrl.login);
 router.get('/me', usersCtrl.getUserProfile);
 router.put('/me', usersCtrl.updateUserProfile);
 router.get('/:id', usersCtrl.getUserProfile);
+router.delete('/:id', usersCtrl.deleteUserProfile);
 
 module.exports = router;
 

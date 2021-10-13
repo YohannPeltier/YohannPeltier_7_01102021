@@ -48,7 +48,6 @@ exports.correctOrientation = async (image) => {
       }
       Jimp.read(buffer, (err, lenna) => {
         if (err) {
-          console.log('err', err);
           return;
         }
         lenna

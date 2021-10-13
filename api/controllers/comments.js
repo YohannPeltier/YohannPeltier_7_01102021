@@ -15,8 +15,6 @@ exports.createComment = (req, res, next) => {
   const content = req.body.content;
   const messageId = parseInt(req.params.id);
 
-  console.log(messageId);
-
   if (content == null) {
     return res.status(400).json({ error: 'missing parameters' });
   }
@@ -32,7 +30,6 @@ exports.createComment = (req, res, next) => {
           where: { id: messageId },
         })
           .then(function (messageFound) {
-            //console.log(messageFound.id);
             done(null, messageFound);
           })
           .catch(function (err) {
@@ -102,7 +99,6 @@ exports.listComments = (req, res, next) => {
 
   // Params
   const messageId = parseInt(req.params.id);
-  console.log(messageId);
 
   if (limit > config.ITEMS_LIMIT) {
     limit = config.ITEMS_LIMIT;
@@ -132,9 +128,79 @@ exports.listComments = (req, res, next) => {
       }
     })
     .catch(function (err) {
-      console.log(err);
       res.status(500).json({ error: 'invalid fields' });
     });
+};
+
+exports.deleteComment = (req, res, next) => {
+  const headerAuth = req.headers['authorization'];
+  const userId = auth.getUserId(headerAuth);
+
+  if (userId < 0) {
+    return res.status(400).json({ error: 'wrong token' });
+  }
+
+  const messageId = parseInt(req.params.id);
+  const commentId = parseInt(req.params.commentId);
+
+  asyncLib.waterfall(
+    [
+      function (done) {
+        models.Message.findOne({
+          where: { id: messageId },
+        })
+          .then(function (messageFound) {
+            done(null, messageFound);
+          })
+          .catch(function (err) {
+            return res.status(500).json({ error: 'unable to verify message' });
+          });
+      },
+      function (messageFound, done) {
+        models.User.findOne({
+          where: { id: userId },
+        })
+          .then(function (userFound) {
+            done(null, messageFound, userFound);
+          })
+          .catch(function (err) {
+            return res.status(500).json({ error: 'unable to verify user' });
+          });
+      },
+      function (messageFound, userFound, done) {
+        if (userFound.id == userId) {
+          models.Comment.destroy({
+            where: { id: commentId },
+          }).then(function () {
+            done(null, messageFound, userFound, { id: commentId });
+          });
+        } else {
+          res.status(404).json({ error: 'user not found' });
+        }
+      },
+      function (messageFound, userFound, commentIdObj, done) {
+        messageFound
+          .update({
+            comments: messageFound.comments - 1,
+          })
+          .then(function () {
+            done(commentIdObj);
+          })
+          .catch(function (err) {
+            return res
+              .status(500)
+              .json({ error: 'cannot update message like counter' });
+          });
+      },
+    ],
+    function (commentIdObj) {
+      if (commentIdObj) {
+        return res.status(201).json(commentIdObj);
+      } else {
+        return res.status(500).json({ error: 'cannot post message' });
+      }
+    }
+  );
 };
 
 export default {};

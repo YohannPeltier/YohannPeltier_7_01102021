@@ -1,34 +1,30 @@
 // Imports
 const asyncLib = require('async');
 const fs = require('fs');
-const { promisify } = require('util');
 const { config } = require('../config.js');
 const models = require('../models');
 const auth = require('../middleware/auth');
 const { correctOrientation } = require('../middleware/orientation');
-
-const unlinkAsync = promisify(fs.unlink);
 
 // Create message
 exports.createMessage = async (req, res, next) => {
   const headerAuth = req.headers['authorization'];
   const userId = auth.getUserId(headerAuth);
 
-  if (userId < 0) {
-    await unlinkAsync(req.file.path);
-    return res.status(400).json({ error: 'wrong token' });
-  }
-
-  // Params
   let content = req.body.content;
   const file = req.file;
+
+  if (userId < 0) {
+    if (file) fs.unlink(file.path, () => {});
+    return res.status(400).json({ error: 'wrong token' });
+  }
 
   if (file) {
     await correctOrientation(file);
   }
 
   if (content == null && file == null) {
-    await unlinkAsync(req.file.path);
+    if (file) fs.unlink(file.path, () => {});
     return res.status(400).json({ error: 'missing parameters' });
   }
 
@@ -46,12 +42,12 @@ exports.createMessage = async (req, res, next) => {
             done(null, userFound);
           })
           .catch(async function (err) {
-            await unlinkAsync(req.file.path);
+            if (file) fs.unlink(file.path, () => {});
             return res.status(500).json({ error: 'unable to verify user' });
           });
       },
       function (userFound, done) {
-        let image = null;
+        let image = '';
         if (file) {
           image = file.filename;
         }
@@ -65,7 +61,7 @@ exports.createMessage = async (req, res, next) => {
             done(newMessage);
           });
         } else {
-          async () => await unlinkAsync(req.file.path);
+          if (file) fs.unlink(file.path, () => {});
           res.status(404).json({ error: 'user not found' });
         }
       },
@@ -74,7 +70,7 @@ exports.createMessage = async (req, res, next) => {
       if (newMessage) {
         return res.status(201).json(newMessage);
       } else {
-        await unlinkAsync(req.file.path);
+        if (file) fs.unlink(file.path, () => {});
         return res.status(500).json({ error: 'cannot post message' });
       }
     }
@@ -127,6 +123,57 @@ exports.listMessages = (req, res, next) => {
     .catch(function (err) {
       res.status(500).json({ error: 'invalid fields' });
     });
+};
+
+exports.deleteMessage = (req, res, next) => {
+  const headerAuth = req.headers['authorization'];
+  const userId = auth.getUserId(headerAuth);
+
+  if (userId < 0) {
+    return res.status(400).json({ error: 'wrong token' });
+  }
+
+  const messageId = parseInt(req.params.id);
+
+  asyncLib.waterfall(
+    [
+      function (done) {
+        models.Message.findOne({
+          where: { id: messageId },
+        })
+          .then(function (messageFound) {
+            done(null, messageFound);
+          })
+          .catch(function (err) {
+            return res.status(500).json({ error: 'unable to verify message' });
+          });
+      },
+      function (messageFound, done) {
+        if (messageFound) {
+          if (userId == messageFound.userId) {
+            messageFound
+              .destroy()
+              .then(function () {
+                done(messageFound);
+              })
+              .catch(function (err) {
+                return res.status(500).json({ error: 'cannot delete message' });
+              });
+          }
+        } else {
+          return res.status(500).json({ error: 'message does not exist' });
+        }
+      },
+    ],
+    function (messageFound) {
+      if (messageFound) {
+        fs.unlink(messageFound.attachement, () => {});
+        return res.status(200).json(messageFound);
+      } else {
+        return res.status(500).json({ error: 'cannot delete message' });
+      }
+    }
+  );
 };
 
 export default {};

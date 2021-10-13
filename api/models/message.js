@@ -14,7 +14,14 @@ module.exports = (sequelize, DataTypes) => {
           allowNull: false,
         },
       });
-      models.Message.hasMany(models.Like);
+      models.Message.hasMany(models.Like, {
+        onDelete: 'cascade',
+        hooks: true,
+      });
+      models.Message.hasMany(models.Comment, {
+        onDelete: 'cascade',
+        hooks: true,
+      });
     }
   }
   Message.init(

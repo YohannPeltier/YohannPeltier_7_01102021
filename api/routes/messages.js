@@ -16,12 +16,14 @@ router.post(
   messagesCtrl.createMessage
 );
 router.get('/', messagesCtrl.listMessages);
+router.delete('/:id', messagesCtrl.deleteMessage);
 
 router.post('/:id/like', likesCtrl.likePost);
 router.post('/:id/dislike', likesCtrl.dislikePost);
 
 router.post('/:id/comments/create', commentsCtrl.createComment);
 router.get('/:id/comments', commentsCtrl.listComments);
+router.delete('/:id/comments/:commentId', commentsCtrl.deleteComment);
 
 module.exports = router;
 

@@ -29,7 +29,6 @@ exports.likePost = (req, res, next) => {
           where: { id: messageId },
         })
           .then(function (messageFound) {
-            //console.log(messageFound.id);
             done(null, messageFound);
           })
           .catch(function (err) {
@@ -178,7 +177,6 @@ exports.dislikePost = (req, res, next) => {
               done(null, messageFound, userFound, userAlreadyLikedFound);
             })
             .catch(function (err) {
-              console.log(err);
               return res
                 .status(500)
                 .json({ error: 'unable to verify is user already liked' });
