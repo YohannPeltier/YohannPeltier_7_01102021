@@ -8,7 +8,16 @@
     <template #header>
       <div class="d-flex ml-n2">
         <nuxt-img
-          :src="`profiles/${user.picture}`"
+          v-if="user.picture && isLoadedProfilePicture"
+          @error.native="onLoadProfilePicture"
+          :src="`${user.picture}`"
+          preset="profileMessage"
+          class="rounded-circle"
+          :alt="`Image de profil de ${user.firstname} ${user.lastname}`"
+        ></nuxt-img>
+        <nuxt-img
+          v-else
+          :src="`static/img/defaults/default_profile.jpeg`"
           preset="profileMessage"
           class="rounded-circle"
           :alt="`Image de profil de ${user.firstname} ${user.lastname}`"
@@ -35,10 +44,14 @@
       </div>
     </template>
     <b-card-body>
-      <b-card-text class="pre">{{ content }}</b-card-text>
-      <b-card-text v-if="attachement" class="ml-n2 mr-n2 mb-n2 text-center">
+      <b-card-text v-if="content" class="pre pb-2">{{ content }}</b-card-text>
+      <b-card-text
+        v-if="attachement && isLoadedMessageImage"
+        class="m-n2 text-center"
+      >
         <nuxt-img
-          :src="`messages/${attachement}`"
+          @error.native="onLoadMessageImage"
+          :src="`${attachement}`"
           sizes="sm:100vw md:100vw lg:742px"
           preset="message"
           class="img-message"
@@ -79,6 +92,7 @@
               align-items-center
               line-height-3
             "
+            :class="{ 'text-primary': commentsCounter }"
           >
             <b-icon icon="chat-square-text" aria-hidden="true"></b-icon>
             <span v-if="commentsCounter" class="ml-3">
@@ -159,6 +173,8 @@ export default {
 
   data: function () {
     return {
+      isLoadedProfilePicture: false,
+      isLoadedMessageImage: false,
       date: new Date(this.createdAt).toLocaleString('fr-FR', {
         month: 'long',
         day: 'numeric',
@@ -182,6 +198,14 @@ export default {
     };
   },
   methods: {
+    onLoadProfilePicture() {
+      console.error('error');
+      this.isLoadedProfilePicture = true;
+    },
+    onLoadMessageImage() {
+      console.error('error');
+      this.isLoadedMessageImage = true;
+    },
     isUserLike() {
       this.usersLikes.forEach((user) => {
         if (user.UserId === this.loggedInUser.id && user.isLike == 1) {

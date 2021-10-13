@@ -1,19 +1,25 @@
 <template>
   <b-list-group-item class="p-3">
-    <div class="d-flex">
-      <b-img
-        :src="coverImageProfil(user.picture)"
-        width="43"
-        height="43"
-        rounded="circle"
+    <div class="d-flex align-items-start">
+      <nuxt-img
+        v-if="user.picture && isLoadedProfilePicture"
+        @error.native="onLoadProfilePicture"
+        :src="`${user.picture}`"
+        preset="profileMessage"
+        class="rounded-circle"
         :alt="`Image de profil de ${user.firstname} ${user.lastname}`"
-      />
+      ></nuxt-img>
+      <nuxt-img
+        v-else
+        :src="`static/img/defaults/default_profile.jpeg`"
+        preset="profileMessage"
+        class="rounded-circle"
+        :alt="`Image de profil de ${user.firstname} ${user.lastname}`"
+      ></nuxt-img>
       <div class="ml-2 flex-grow-1 py-2 px-3 rounded comment">
         <div class="d-flex align-items-baseline">
           <h6 class="mb-0 font-size-n1">
-            <b-link
-              class="text-dark"
-              :to="`/users/${userId === loggedInUser.id ? 'Profile' : userId}`"
+            <b-link class="text-dark" :to="`/users/${userId}`"
               >{{ user.firstname }} {{ user.lastname }}</b-link
             >
           </h6>
@@ -51,9 +57,6 @@
 }
 </style>
 <style scoped>
-img {
-  object-fit: cover;
-}
 .comment {
   background-color: #e2e6ea;
 }
@@ -61,7 +64,6 @@ img {
 
 <script>
 import { mapGetters } from 'vuex';
-import { IMAGE_PROFILE_DEFAULT } from '../../../constants';
 
 export default {
   computed: {
@@ -71,6 +73,7 @@ export default {
 
   data: function () {
     return {
+      isLoadedProfilePicture: false,
       date: new Date(this.createdAt).toLocaleString('fr-FR', {
         month: 'long',
         day: 'numeric',
@@ -93,15 +96,9 @@ export default {
     };
   },
   methods: {
-    coverImageProfil(url) {
-      if (url !== '') {
-        try {
-          url = require('@/assets/img/profiles/' + url);
-        } catch (e) {
-          url = IMAGE_PROFILE_DEFAULT; // Default image.
-        }
-      } else url = IMAGE_PROFILE_DEFAULT; // Default image.
-      return url;
+    onLoadProfilePicture() {
+      console.error('error');
+      this.isLoadedProfilePicture = true;
     },
   },
 };
