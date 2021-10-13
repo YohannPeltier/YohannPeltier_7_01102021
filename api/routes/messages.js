@@ -7,7 +7,7 @@ const messagesCtrl = require('../controllers/messages');
 const likesCtrl = require('../controllers/likes');
 const commentsCtrl = require('../controllers/comments');
 
-const { multerMessage } = require('../middleware/multer-config');
+const { multerMessage } = require('../middleware/storages');
 
 // Routes
 router.post(

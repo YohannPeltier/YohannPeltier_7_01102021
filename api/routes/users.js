@@ -4,7 +4,7 @@ const router = express.Router();
 
 const usersCtrl = require('../controllers/users');
 
-const { multerProfile } = require('../middleware/multer-config');
+const { multerProfile } = require('../middleware/storages');
 
 //console.log(multer.profileImage);
 
