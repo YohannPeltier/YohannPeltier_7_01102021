@@ -10,7 +10,7 @@
       <template #header>
         <div class="text-center">
           <nuxt-img
-            v-if="picture && isLoadedProfilePicture"
+            v-if="picture !== '' && isLoadedProfilePicture !== true"
             @error.native="onLoadProfilePicture"
             :src="`${picture}`"
             preset="profile"

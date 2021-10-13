@@ -2,7 +2,7 @@
   <b-list-group-item class="p-3">
     <div class="d-flex align-items-start">
       <nuxt-img
-        v-if="user.picture && isLoadedProfilePicture"
+        v-if="user.picture !== '' && isLoadedProfilePicture !== true"
         @error.native="onLoadProfilePicture"
         :src="`${user.picture}`"
         preset="profileMessage"

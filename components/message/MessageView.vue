@@ -8,7 +8,7 @@
     <template #header>
       <div class="d-flex ml-n2">
         <nuxt-img
-          v-if="user.picture && isLoadedProfilePicture"
+          v-if="user.picture !== '' && isLoadedProfilePicture !== true"
           @error.native="onLoadProfilePicture"
           :src="`${user.picture}`"
           preset="profileMessage"
@@ -46,7 +46,7 @@
     <b-card-body>
       <b-card-text v-if="content" class="pre pb-2">{{ content }}</b-card-text>
       <b-card-text
-        v-if="attachement && isLoadedMessageImage"
+        v-if="attachement !== '' && isLoadedMessageImage !== true"
         class="m-n2 text-center"
       >
         <nuxt-img
