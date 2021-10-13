@@ -1,26 +1,35 @@
 // Imports
+const asyncLib = require('async');
+const fs = require('fs');
+const { promisify } = require('util');
 const { config } = require('../config.js');
 const models = require('../models');
-const asyncLib = require('async');
 const auth = require('../middleware/auth');
+const { correctOrientation } = require('../middleware/orientation');
+
+const unlinkAsync = promisify(fs.unlink);
 
 // Create message
-exports.createMessage = (req, res, next) => {
+exports.createMessage = async (req, res, next) => {
   const headerAuth = req.headers['authorization'];
   const userId = auth.getUserId(headerAuth);
 
-  if (userId < 0) return res.status(400).json({ error: 'wrong token' });
+  if (userId < 0) {
+    await unlinkAsync(req.file.path);
+    return res.status(400).json({ error: 'wrong token' });
+  }
 
   // Params
   let content = req.body.content;
   const file = req.file;
 
-  if (content == null) {
-    return res.status(400).json({ error: 'missing parameters' });
+  if (file) {
+    await correctOrientation(config.ROUTE_IMAGES_MESSAGES, file);
   }
 
-  if (content.length < config.CONTENT_LIMIT_MIN) {
-    return res.status(400).json({ error: 'invalid parameters' });
+  if (content == null && file == null) {
+    await unlinkAsync(req.file.path);
+    return res.status(400).json({ error: 'missing parameters' });
   }
 
   content = content
@@ -36,12 +45,14 @@ exports.createMessage = (req, res, next) => {
           .then(function (userFound) {
             done(null, userFound);
           })
-          .catch(function (err) {
+          .catch(async function (err) {
+            await unlinkAsync(req.file.path);
             return res.status(500).json({ error: 'unable to verify user' });
           });
       },
-      function (userFound, done) {
+      async function (userFound, done) {
         let image = null;
+        console.log(file);
         if (file) {
           console.log(file.filename);
           image = file.filename;
@@ -56,14 +67,16 @@ exports.createMessage = (req, res, next) => {
             done(newMessage);
           });
         } else {
+          await unlinkAsync(req.file.path);
           res.status(404).json({ error: 'user not found' });
         }
       },
     ],
-    function (newMessage) {
+    async function (newMessage) {
       if (newMessage) {
         return res.status(201).json(newMessage);
       } else {
+        await unlinkAsync(req.file.path);
         return res.status(500).json({ error: 'cannot post message' });
       }
     }
@@ -112,7 +125,6 @@ exports.listMessages = (req, res, next) => {
       }
     })
     .catch(function (err) {
-      console.log(err);
       res.status(500).json({ error: 'invalid fields' });
     });
 };

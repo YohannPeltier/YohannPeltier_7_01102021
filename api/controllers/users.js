@@ -1,12 +1,18 @@
 // Imports
 const bcrypt = require('bcrypt');
+const asyncLib = require('async');
+const fs = require('fs');
+const { promisify } = require('util');
 const { config } = require('../config');
 const models = require('../models');
-const asyncLib = require('async');
+
 const auth = require('../middleware/auth');
+const { correctOrientation } = require('../middleware/orientation');
+
+const unlinkAsync = promisify(fs.unlink);
 
 // SignUp
-exports.signup = (req, res, next) => {
+exports.signup = async (req, res, next) => {
   // Params
   const email = req.body.email;
   const firstname = req.body.firstname;
@@ -15,26 +21,28 @@ exports.signup = (req, res, next) => {
   const file = req.file;
   const bio = req.body.bio;
 
+  if (file) {
+    await correctOrientation(config.ROUTE_IMAGES_PROFILES, file);
+  }
+
   if (
     email == null ||
     firstname == null ||
     lastname == null ||
     password == null
   ) {
+    await unlinkAsync(req.file.path);
     return res.status(400).json({ error: 'missing parameters' });
   }
 
-  if (!config.NAME_REGEX.test(firstname)) {
-    return res.status(400).json({ error: 'invalid firstname' });
-  }
-  if (!config.NAME_REGEX.test(lastname)) {
-    return res.status(400).json({ error: 'invalid lastname' });
-  }
-  if (!config.EMAIL_REGEX.test(email)) {
-    return res.status(400).json({ error: 'invalid email' });
-  }
-  if (!config.PASSWORD_REGEX.test(password)) {
-    return res.status(400).json({ error: 'invalid password' });
+  if (
+    !config.NAME_REGEX.test(firstname) ||
+    !config.NAME_REGEX.test(lastname) ||
+    !config.EMAIL_REGEX.test(email) ||
+    !config.PASSWORD_REGEX.test(password)
+  ) {
+    await unlinkAsync(req.file.path);
+    return res.status(400).json({ error: 'invalid parameters' });
   }
 
   asyncLib.waterfall(
@@ -47,21 +55,23 @@ exports.signup = (req, res, next) => {
           .then(function (userFound) {
             done(null, userFound);
           })
-          .catch(function (err) {
+          .catch(async function (err) {
+            await unlinkAsync(req.file.path);
             return res.status(500).json({ error: 'unable to verify user' });
           });
       },
-      function (userFound, done) {
+      async function (userFound, done) {
         if (!userFound) {
           bcrypt.hash(password, 5, function (err, bcryptedPassword) {
             done(null, userFound, bcryptedPassword);
           });
         } else {
+          await unlinkAsync(req.file.path);
           return res.status(409).json({ error: 'user already exist' });
         }
       },
       function (userFound, bcryptedPassword, done) {
-        let picture = 'default.jpg';
+        let picture = '';
         if (file) {
           picture = file.filename;
         }
@@ -77,17 +87,19 @@ exports.signup = (req, res, next) => {
           .then(function (newUser) {
             done(newUser);
           })
-          .catch(function (err) {
+          .catch(async function (err) {
+            await unlinkAsync(req.file.path);
             return res.status(500).json({ error: 'cannot add user' });
           });
       },
     ],
-    function (newUser) {
+    async function (newUser) {
       if (newUser) {
         return res.status(201).json({
           userId: newUser.id,
         });
       } else {
+        await unlinkAsync(req.file.path);
         return res.status(500).json({ error: 'cannot add user' });
       }
     }
@@ -192,6 +204,13 @@ exports.updateUserProfile = (req, res) => {
 
   // Params
   const bio = req.body.bio;
+  const email = req.body.email;
+
+  if (email) {
+    if (!config.EMAIL_REGEX.test(email)) {
+      return res.status(400).json({ error: 'invalid email' });
+    }
+  }
 
   asyncLib.waterfall(
     [
@@ -211,7 +230,8 @@ exports.updateUserProfile = (req, res) => {
         if (userFound) {
           userFound
             .update({
-              bio: bio ? bio : userFound.bio,
+              bio: bio != null ? bio : userFound.bio,
+              email: email ? email : userFound.email,
             })
             .then(function () {
               done(userFound);
