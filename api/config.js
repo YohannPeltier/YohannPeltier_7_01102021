@@ -10,10 +10,12 @@ const config = {
     'image/jpg': 'jpg',
     'image/jpeg': 'jpeg',
     'image/png': 'png',
+    'image/gif': 'gif',
   },
   LIMIT_SIZE: 5 * 1024 * 1024,
   ROUTE_IMAGES_PROFILES: 'assets/img/profiles',
   ROUTE_IMAGES_MESSAGES: 'assets/img/messages',
+  ROUTE_IMAGES_NULL: 'assets/img/null',
 };
 
 module.exports = { config };
