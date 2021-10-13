@@ -3,7 +3,7 @@ export default {
   head: {
     title: 'YohannPeltier_7_01102021',
     htmlAttrs: {
-      lang: 'en',
+      lang: 'fr',
     },
     meta: [
       { charset: 'utf-8' },
@@ -43,7 +43,7 @@ export default {
   ],
 
   image: {
-    dir: 'assets/img',
+    dir: '',
     screens: {
       sm: 576,
       md: 768,
@@ -56,6 +56,7 @@ export default {
           fit: 'cover',
           width: 43,
           height: 43,
+          default: 'static/img/defaults/default_profile.jpeg',
         },
       },
       profile: {
@@ -63,6 +64,7 @@ export default {
           fit: 'cover',
           width: 150,
           height: 150,
+          default: 'static/img/defaults/default_profile.jpeg',
         },
       },
       message: {
