@@ -2,17 +2,21 @@
   <div>
     <Notification :message="error" v-if="error"></Notification>
     <b-card
+      @mouseover="isOveredProfile = true"
+      @mouseleave="isOveredProfile = false"
       no-body
       tag="article"
       header-tag="header"
       class="shadow-sm mx-auto mb-4 mt-3 w-9"
     >
       <template #header>
-        <div class="text-center">
+        <div class="text-center position-relative">
           <nuxt-img
-            v-if="picture !== '' && isLoadedProfilePicture !== true"
-            @error.native="onLoadProfilePicture"
+            v-if="picture !== '' && isLoadedProfilePicture === true"
+            @error.native="isLoadedProfilePicture = false"
             :src="`${picture}`"
+            height="150"
+            width="150"
             preset="profile"
             class="rounded-circle"
             :alt="`Image de profil de ${firstname} ${lastname}`"
@@ -25,6 +29,14 @@
             :alt="`Image de profil de ${firstname} ${lastname}`"
           ></nuxt-img>
           <h3>{{ firstname }} {{ lastname }}</h3>
+          <b-link
+            v-if="isOveredProfile === true && isMe"
+            @click="deleteProfile"
+            :aria-label="`Supprimer`"
+            class="text-danger position-absolute mt-2 top-0 right-0 h4"
+          >
+            <b-icon icon="trash" aria-hidden="true"></b-icon>
+          </b-link>
         </div>
       </template>
       <b-list-group flush>
@@ -120,10 +132,21 @@
 .gap-3 {
   gap: 1rem;
 }
+.top-0 {
+  top: 0;
+}
+.right-0 {
+  right: 0;
+}
 </style>
 
 <script>
-import { BIcon, BIconPencil, BIconCheckCircle } from 'bootstrap-vue';
+import {
+  BIcon,
+  BIconPencil,
+  BIconCheckCircle,
+  BIconTrash,
+} from 'bootstrap-vue';
 import { mapGetters } from 'vuex';
 
 export default {
@@ -131,6 +154,7 @@ export default {
     BIcon,
     BIconPencil,
     BIconCheckCircle,
+    BIconTrash,
   },
   computed: {
     ...mapGetters(['loggedInUser']),
@@ -139,7 +163,8 @@ export default {
   data() {
     return {
       error: null,
-      isLoadedProfilePicture: false,
+      isOveredProfile: false,
+      isLoadedProfilePicture: true,
       modifyBio: {
         state: false,
         icon: 'pencil',
@@ -157,10 +182,6 @@ export default {
     };
   },
   methods: {
-    onLoadProfilePicture() {
-      console.error('error');
-      this.isLoadedProfilePicture = true;
-    },
     async modifyBioEvent() {
       if (this.modifyBio.state) {
         await this.$axios
@@ -208,6 +229,12 @@ export default {
         this.modifyEmail.aria = "Enregister l'adresse email";
         this.modifyEmail.variant = 'outline-success';
       }
+    },
+    async deleteProfile() {
+      await this.$axios.delete(`users/${this.id}`).then(async (res) => {
+        await this.$router.push('/');
+        await this.$auth.logout();
+      });
     },
   },
 };

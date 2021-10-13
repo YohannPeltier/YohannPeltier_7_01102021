@@ -14,7 +14,7 @@
         :isMe="true"
       ></ProfileView>
       <MessageViewAll
-        :userId="loggedInUser.id"
+        :profileUserId="loggedInUser.id"
         :viewPostMessage="true"
       ></MessageViewAll>
     </template>

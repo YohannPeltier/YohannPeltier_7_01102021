@@ -2,8 +2,8 @@
   <b-list-group-item class="p-3">
     <div class="d-flex align-items-start">
       <nuxt-img
-        v-if="user.picture !== '' && isLoadedProfilePicture !== true"
-        @error.native="onLoadProfilePicture"
+        v-if="user.picture !== '' && isLoadedProfilePicture === true"
+        @error.native="isLoadedProfilePicture = false"
         :src="`${user.picture}`"
         preset="profileMessage"
         class="rounded-circle"
@@ -16,7 +16,11 @@
         class="rounded-circle"
         :alt="`Image de profil de ${user.firstname} ${user.lastname}`"
       ></nuxt-img>
-      <div class="ml-2 flex-grow-1 py-2 px-3 rounded comment">
+      <div
+        @mouseover="isOveredComment = true"
+        @mouseleave="isOveredComment = false"
+        class="ml-2 flex-grow-1 py-2 px-3 rounded comment"
+      >
         <div class="d-flex align-items-baseline">
           <h6 class="mb-0 font-size-n1">
             <b-link class="text-dark" :to="`/users/${userId}`"
@@ -36,6 +40,14 @@
           >
             le {{ dateLong }} à {{ time }}
           </b-tooltip>
+          <b-link
+            v-if="isOveredComment === true && userId === loggedInUser.id"
+            @click="deleteComment"
+            aria-label="Supprimer"
+            class="text-danger ml-auto my-n1 font-size-n1"
+          >
+            <b-icon icon="trash" aria-hidden="true"></b-icon>
+          </b-link>
         </div>
         <div class="font-weight-light">
           {{ content }}
@@ -63,17 +75,23 @@
 </style>
 
 <script>
+import { BIcon, BIconTrash } from 'bootstrap-vue';
 import { mapGetters } from 'vuex';
 
 export default {
   computed: {
     ...mapGetters(['loggedInUser']),
   },
-  props: ['id', 'userId', 'user', 'content', 'createdAt'],
+  components: {
+    BIcon,
+    BIconTrash,
+  },
+  props: ['id', 'userId', 'messageId', 'user', 'content', 'createdAt'],
 
   data: function () {
     return {
-      isLoadedProfilePicture: false,
+      isOveredComment: false,
+      isLoadedProfilePicture: true,
       date: new Date(this.createdAt).toLocaleString('fr-FR', {
         month: 'long',
         day: 'numeric',
@@ -96,9 +114,12 @@ export default {
     };
   },
   methods: {
-    onLoadProfilePicture() {
-      console.error('error');
-      this.isLoadedProfilePicture = true;
+    async deleteComment() {
+      await this.$axios
+        .delete(`messages/${this.messageId}/comments/${this.id}`)
+        .then((res) => {
+          this.$parent.deleteComment(res.data);
+        });
     },
   },
 };

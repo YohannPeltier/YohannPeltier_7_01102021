@@ -129,7 +129,6 @@ export default {
           this.image = null;
           this.$refs.inputImage.value = '';
           this.labelInputImage = 'Ajouter une images...';
-          console.log(res.data);
           this.$parent.newMessage(res.data);
           this.loader = false;
         })

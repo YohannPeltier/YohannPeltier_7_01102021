@@ -1,6 +1,8 @@
 <template>
   <b-card
     no-body
+    @mouseover="isOveredMessage = true"
+    @mouseleave="isOveredMessage = false"
     tag="article"
     header-tag="header"
     class="shadow-sm mx-auto mt-3 w-9"
@@ -8,8 +10,8 @@
     <template #header>
       <div class="d-flex ml-n2">
         <nuxt-img
-          v-if="user.picture !== '' && isLoadedProfilePicture !== true"
-          @error.native="onLoadProfilePicture"
+          v-if="user.picture !== '' && isLoadedProfilePicture === true"
+          @error.native="isLoadedProfilePicture = false"
           :src="`${user.picture}`"
           preset="profileMessage"
           class="rounded-circle"
@@ -41,16 +43,24 @@
             le {{ dateLong }} à {{ time }}
           </b-tooltip>
         </div>
+        <b-link
+          v-if="isOveredMessage === true && userId === loggedInUser.id"
+          @click="deleteMessage"
+          aria-label="Supprimer"
+          class="text-danger ml-auto"
+        >
+          <b-icon icon="trash" aria-hidden="true"></b-icon>
+        </b-link>
       </div>
     </template>
     <b-card-body>
       <b-card-text v-if="content" class="pre pb-2">{{ content }}</b-card-text>
       <b-card-text
-        v-if="attachement !== '' && isLoadedMessageImage !== true"
+        v-if="attachement !== '' && isLoadedMessageImage === true"
         class="m-n2 text-center"
       >
         <nuxt-img
-          @error.native="onLoadMessageImage"
+          @error.native="isLoadedMessageImage = false"
           :src="`${attachement}`"
           sizes="sm:100vw md:100vw lg:742px"
           preset="message"
@@ -111,6 +121,7 @@
           :key="comment.id"
           :id="comment.id"
           :userId="comment.UserId"
+          :messageId="comment.messageId"
           :user="comment.User"
           :content="comment.content"
           :createdAt="comment.createdAt"
@@ -151,7 +162,12 @@
 </style>
 
 <script>
-import { BIcon, BIconHandThumbsUp, BIconChatSquareText } from 'bootstrap-vue';
+import {
+  BIcon,
+  BIconHandThumbsUp,
+  BIconChatSquareText,
+  BIconTrash,
+} from 'bootstrap-vue';
 import { mapGetters } from 'vuex';
 
 export default {
@@ -162,6 +178,7 @@ export default {
     BIcon,
     BIconHandThumbsUp,
     BIconChatSquareText,
+    BIconTrash,
   },
   props: [
     'id',
@@ -177,8 +194,9 @@ export default {
 
   data: function () {
     return {
-      isLoadedProfilePicture: false,
-      isLoadedMessageImage: false,
+      isOveredMessage: false,
+      isLoadedProfilePicture: true,
+      isLoadedMessageImage: true,
       date: new Date(this.createdAt).toLocaleString('fr-FR', {
         month: 'long',
         day: 'numeric',
@@ -203,13 +221,10 @@ export default {
     };
   },
   methods: {
-    onLoadProfilePicture() {
-      console.error('error');
-      this.isLoadedProfilePicture = true;
-    },
-    onLoadMessageImage() {
-      console.error('error');
-      this.isLoadedMessageImage = true;
+    async deleteMessage() {
+      await this.$axios.delete(`messages/${this.id}`).then((res) => {
+        this.$parent.deleteMessage(res.data);
+      });
     },
     isUserLike() {
       this.usersLikes.forEach((user) => {
@@ -245,19 +260,30 @@ export default {
             this.comments = res;
             this.isComments = true;
           })
-          .catch((error) => console.log(error));
+          .catch((error) => {
+            if (error !== '') console.log(error);
+          });
       }
     },
     newComment(data) {
-      console.log(data);
       data.User = {
         firstname: this.loggedInUser.firstname,
         lastnbame: this.loggedInUser.lastname,
         picture: this.loggedInUser.picture,
       };
-      console.log(data);
       this.comments.push(data);
       this.commentsCounter++;
+    },
+    deleteComment(data) {
+      const index = this.comments
+        .map(function (comment) {
+          return comment.id;
+        })
+        .indexOf(data.id);
+      if (index > -1) {
+        this.comments.splice(index, 1);
+        this.commentsCounter--;
+      }
     },
   },
   beforeMount() {

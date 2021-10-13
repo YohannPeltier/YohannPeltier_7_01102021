@@ -38,7 +38,6 @@ export default {
         }`
       )
       .then((res) => {
-        console.log(this.viewPostMessage);
         this.messages = res;
       })
       .catch((error) => (this.errored = true))
@@ -49,7 +48,6 @@ export default {
   },
   methods: {
     newMessage(data) {
-      console.log(data);
       data.User = {
         firstname: this.loggedInUser.firstname,
         lastname: this.loggedInUser.lastname,
@@ -57,6 +55,16 @@ export default {
       };
       data.Likes = [];
       this.messages.unshift(data);
+    },
+    deleteMessage(data) {
+      const index = this.messages
+        .map(function (message) {
+          return message.id;
+        })
+        .indexOf(data.id);
+      if (index > -1) {
+        this.messages.splice(index, 1);
+      }
     },
   },
 };
