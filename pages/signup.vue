@@ -109,14 +109,9 @@
 </style>
 
 <script>
-import Notification from '~/components/Notification';
-
 export default {
   middleware: 'guest',
 
-  components: {
-    Notification,
-  },
   data() {
     return {
       firstname: '',

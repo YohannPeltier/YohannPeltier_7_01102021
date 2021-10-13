@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Navbar />
+    <Navbar /r>
     <nuxt />
   </div>
 </template>
@@ -11,13 +11,3 @@ body {
   min-width: 320px;
 }
 </style>
-
-<script>
-import Navbar from '~/components/Navbar';
-
-export default {
-  components: {
-    Navbar,
-  },
-};
-</script>
