@@ -5,7 +5,6 @@
       <nuxt-img
         :src="`static/img/logo.svg`"
         alt="Logo Groupomania"
-        preset="logo"
         class="img-fluid mw-100"
       />
     </b-navbar-brand>
