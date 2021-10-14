@@ -25,7 +25,6 @@ export default {
   data() {
     return {
       messages: [],
-      key: 0,
     };
   },
   async fetch() {
