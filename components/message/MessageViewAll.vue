@@ -26,22 +26,14 @@ export default {
     return {
       messages: [],
       key: 0,
-      loading: true,
-      errored: false,
     };
   },
   async fetch() {
-    await this.$axios
-      .$get(
-        `messages${
-          this.profileUserId ? '/?where=userId:' + this.profileUserId : ''
-        }`
-      )
-      .then((res) => {
-        this.messages = res;
-      })
-      .catch((error) => (this.errored = true))
-      .finally(() => (this.loading = false));
+    let where = this.profileUserId ? `where=userId:${this.profileUserId}` : '';
+    this.offsetCount += this.nbLimit;
+    await this.$axios.$get(`messages/?${where}`).then((res) => {
+      this.messages = res;
+    });
   },
   computed: {
     ...mapGetters(['loggedInUser']),
