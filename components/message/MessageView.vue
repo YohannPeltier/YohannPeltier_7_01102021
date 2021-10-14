@@ -197,6 +197,7 @@ export default {
 
   data: function () {
     return {
+      comments: [],
       isOveredMessage: false,
       isLoadedProfilePicture: true,
       isLoadedMessageImage: true,
