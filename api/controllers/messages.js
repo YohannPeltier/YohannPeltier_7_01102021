@@ -96,9 +96,8 @@ exports.listMessages = (req, res, next) => {
     order: [order != null ? order.split(':') : ['createdAt', 'DESC']],
     attributes: fields !== '*' && fields != null ? fields.split(',') : null,
     where: where != null ? { [where.split(':')[0]]: where.split(':')[1] } : '',
-    limit:
-      limit > 0 && limit <= config.ITEMS_LIMIT ? limit : config.ITEMS_LIMIT,
-    offset: !isNaN(offset) ? offset : null,
+    limit: limit > 0 && limit <= config.ITEMS_LIMIT ? limit : null,
+    offset: offset > 0 ? offset : null,
     include: [
       {
         model: models.User,
