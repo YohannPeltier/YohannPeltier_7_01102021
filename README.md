@@ -2,11 +2,17 @@
 
 ## Config
 
-The .env.example file gives you an example of the .env file
+The `.env.example` file gives you an example of the `.env` file.
 
-The api/config/config.json file is used to configure the database
+The `api/config/config.json` file is used to configure the database.
 
-You can create the database with groupomania_development.sql
+
+## Database
+
+MySQL Database :
+
+You can create the database with `groupomania_development.sql`.
+
 
 ## Build Setup
 
@@ -25,6 +31,7 @@ $ npm run start
 $ npm run generate
 ```
 
+
 ## Default administrator user
 
 Email: `admin@groupomania.com`
@@ -33,7 +40,7 @@ Password: `password`
 
 ### `assets`
 
-The asset directory contains images upload by users 
+The asset directory contains images upload by users.
 
 
 ### `static`
