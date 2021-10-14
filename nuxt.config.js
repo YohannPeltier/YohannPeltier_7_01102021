@@ -56,7 +56,6 @@ export default {
           fit: 'cover',
           width: 43,
           height: 43,
-          default: 'static/img/defaults/default_profile.jpeg',
         },
       },
       profile: {
@@ -64,7 +63,6 @@ export default {
           fit: 'cover',
           width: 150,
           height: 150,
-          default: 'static/img/defaults/default_profile.jpeg',
         },
       },
       message: {
