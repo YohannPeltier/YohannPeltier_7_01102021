@@ -61,6 +61,7 @@ typings/
 
 # sequelize config
 /api/config/config.json
+/api/migrations/
 
 # folder upload images
 /assets/
