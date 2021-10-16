@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 --
 
 INSERT INTO `users` (`id`, `email`, `firstname`, `lastname`, `password`, `picture`, `bio`, `isAdmin`, `createdAt`, `updatedAt`) VALUES
-(1, 'admin@groupomania.com', 'Super', 'Admin', '$2b$05$K6gZ5Mti2N0Q4Eu1/08xK.HLBSBPFl0jsCaYa1w.TufNSHW3TbXd2', '', NULL, 0, '2021-10-14 08:01:53', '2021-10-14 08:01:53');
+(1, 'admin@groupomania.com', 'Super', 'Admin', '$2b$05$K6gZ5Mti2N0Q4Eu1/08xK.HLBSBPFl0jsCaYa1w.TufNSHW3TbXd2', '', NULL, 1, '2021-10-14 08:01:53', '2021-10-14 08:01:53');
 
 --
 -- Contraintes pour les tables déchargées
